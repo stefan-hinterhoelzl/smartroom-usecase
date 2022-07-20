@@ -5,17 +5,20 @@ import logging
 LOGGER = logging.getLogger()
 
 def on_message(client, userdata, message):
-    print("message received ", str(message.payload.decode("utf-8")))
     print("message topic=", message.topic)
+    print("message received ", str(message.payload.decode("utf-8")))
+    
 
 def on_connect(client, userdata, flags, rc):
     print("Connected to mqtt broker!")
 
-    client.subscribe("zigbee2mqtt/0xbc33acfffe108988")
+
+    #use # as multiple level wildcard and + as single level wildcard
+    client.subscribe("zigbee2mqtt/#")
 
 
 
-client = mqtt.Client("Zigbee2Mqtt")
+client = mqtt.Client("zigbee2mqtt")
 client.on_message=on_message
 client.on_connect=on_connect
 

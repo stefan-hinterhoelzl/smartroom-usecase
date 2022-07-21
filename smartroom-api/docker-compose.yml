@@ -24,12 +24,12 @@ services:
 
   timeScaledb:
     container_name: timeScaledb
-    image: postgres:14.3-alpine
+    image: timescale/timescaledb-ha:pg14-latest
     restart: always
     networks:
       - db_network
     volumes: 
-      - postgres_data:/var/lib/postgresql/postgres_data
+      - /data/timescaledb:/var/lib/postgresql/postgres_data
       - ./Database_Schema.sql:/docker-entrypoint-initdb.d/Database_Schema.sql
     environment:
       - PGDATA=/var/lib/postgresql/data/timescale/

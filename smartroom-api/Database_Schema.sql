@@ -13,8 +13,7 @@ CREATE TABLE Lights(
 	color_y float NOT NULL,
 	time timestamp NOT NULL,
 	PRIMARY KEY (room_id, light_id),
-	FOREIGN KEY (room_id)
-    REFERENCES Room (room_id)
+	FOREIGN KEY (room_id) REFERENCES Room (room_id)
 );
 
 CREATE TABLE Motion_Sensors(
@@ -24,8 +23,7 @@ CREATE TABLE Motion_Sensors(
 	is_active boolean NOT NULL,
 	time timestamp NOT NULL,
 	PRIMARY KEY (room_id, sensor_Id),
-	FOREIGN KEY (room_id),
-	REFERENCES Room (room_id)
+	FOREIGN KEY (room_id) REFERENCES Room (room_id)
 );
 
 CREATE TABLE Power_Plug(
@@ -35,6 +33,5 @@ CREATE TABLE Power_Plug(
 	is_active boolean NOT NULL,
 	time timestamp NOT NULL,
 	PRIMARY KEY (room_Id, plug_Id),
-	FOREIGN KEY (room_Id),
-	REFERENCES Room (room_Id)
+	FOREIGN KEY (room_Id) REFERENCES Room (room_Id)
 );

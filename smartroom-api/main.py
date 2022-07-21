@@ -13,9 +13,6 @@ from fastAPI_models import Room_Object,Update_RoomObject,AirQuality_Properties_O
 from typing import List
 from sqlalchemy import and_
 
-from zigpy_znp.tools import common, form_network, flash_read, flash_write, energy_scan, network_scan
-
-
 database = Database(settings.DATABASE_URL)
 
 app = FastAPI(title=settings.PROJECT_NAME)
@@ -31,27 +28,6 @@ app.add_middleware(
 cur = conn.cursor()
 
 
-
-# Form a Network
-@app.put("/Networks/{radiopath}/", status_code = status.HTTP_200_OK)
-async def form_new_network(radiopath:str):
-    try:
-        await form_network.main(radiopath)
-    except Exception as ex:
-        logger.error(f"{ex.__class__.__name__}: {ex}")
-        return {"code":"error","message":"scan failed"}
-    return {"code":"success","message":"scan successful"}
-
-@app.get("/Networks/{radiopath}/", status_code = status.HTTP_200_OK)
-async def scan_network(radiopath:str):
-    try:
-        await network_scan.main(radiopath)
-    except Exception as ex:
-        logger.error(f"{ex.__class__.__name__}: {ex}")
-        return {"code":"error","message":"network not formed"}
-    return {"code":"success","message":"network formed"}
-
-
 @app.get("/Test/", status_code = status.HTTP_200_OK)
 async def test_call():
     return {"code":"success","message":"updated room edit"}
@@ -60,7 +36,7 @@ async def test_call():
 # room
 @app.post("/Rooms/",response_model=Room_Object, status_code = status.HTTP_201_CREATED)
 async def add_Room(addRoom:Room_Object):
-    db_classes = Room(room_id=addRoom.room_id,room_size=addRoom.room_size,measurement_unit=addRoom.measurement_unit)
+    db_classes = Room(room_id=addRoom.room_id,room_size=addRoom.room_size,room_name=addRoom.room_name)
     try:
         db_Session.add(db_classes)
         db_Session.flush()
@@ -103,42 +79,6 @@ async def delete_Room(room_id:str):
     db_Session.commit()
     return {"code":"success","message":f"deleted room with id {room_id}"} 
   
-# airQualityinRoom
-
-@app.post("/Room/AirQuality/", response_model=AirQuality_Properties_Object, status_code = status.HTTP_201_CREATED)
-async def add_AirQuality_Properties(addAirQuality:AirQuality_Properties_Object):
-    db_AQP=Airqualityproperty(room_id=addAirQuality.room_id,ventilator=addAirQuality.ventilator,totalnumberofpeople=addAirQuality.totalnumberofpeople,co2=addAirQuality.co2,co2measurementunit=addAirQuality.co2measurementunit,temperature=addAirQuality.temperature,temperaturemeasurementunit=addAirQuality.temperaturemeasurementunit,humidity=addAirQuality.humidity,humiditymeasurementunit=addAirQuality.humiditymeasurementunit,time=addAirQuality.time)
-    try:
-        db_Session.add(db_AQP)
-        db_Session.flush()
-        db_Session.commit()
-    except Exception as ex:
-        logger.error(f"{ex.__class__.__name__}: {ex}")
-        db_Session.rollback()
-    return addAirQuality
-
-@app.get("/Room/AirQuality/", response_model=AirQuality_Properties_Object, status_code = status.HTTP_200_OK)
-async def get_AirQuality_Rooms():
-    
-    AQPresults=db_Session.query(Airqualityproperty).all()
-      
-    return AQPresults         
-  
-@app.get("/Room/{room_id}/AirQuality/temperature/{timestamp}/", response_model=List[AirQuality_Temperature_Object], status_code = status.HTTP_200_OK)
-async def get_AirQuality_Temperature(room_id:str,timestamp:datetime):
-    AQPTemperature=db_Session.query(Airqualityproperty.room_id,Airqualityproperty.temperature,Airqualityproperty.temperaturemeasurementunit,Airqualityproperty.totalnumberofpeople,Airqualityproperty.ventilator,Airqualityproperty.time).filter(Airqualityproperty.room_id==room_id,Airqualityproperty.time==timestamp).all()
-    return AQPTemperature
-
-@app.get("/Room/{room_id}/AirQuality/humidity/{timestamp}", response_model=List[AirQuality_Humidity_Object], status_code = status.HTTP_200_OK)
-async def get_AirQuality_Humidity(room_id:str,timestamp:datetime):
-    AQPHumidity=db_Session.query(Airqualityproperty.room_id,Airqualityproperty.humidity,Airqualityproperty.humiditymeasurementunit,Airqualityproperty.totalnumberofpeople,Airqualityproperty.ventilator,Airqualityproperty.time).filter(Airqualityproperty.room_id==room_id,Airqualityproperty.time==timestamp).all()
-    return AQPHumidity
-
-@app.get("/Room/{room_id}/AirQuality/co2/{timestamp}/", response_model=List[AirQuality_Co2_Object], status_code = status.HTTP_200_OK)
-async def get_AirQuality_Co2(room_id:str,timestamp:datetime):
-    AQPCo2=db_Session.query(Airqualityproperty.room_id,Airqualityproperty.co2,Airqualityproperty.co2measurementunit,Airqualityproperty.totalnumberofpeople,Airqualityproperty.ventilator,Airqualityproperty.time).filter(Airqualityproperty.room_id==room_id,Airqualityproperty.time==timestamp).all()
-    return AQPCo2    
-
 
 # lights
 @app.post("/Room/Light/", response_model=Lights_Object, status_code=status.HTTP_201_CREATED)

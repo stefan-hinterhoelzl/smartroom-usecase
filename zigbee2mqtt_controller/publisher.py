@@ -4,32 +4,50 @@ import logging
 import json
 
 
+TOPIC = ""
+DATA = {}
+#****Change Host IP if necessary here****
+MOSQUITTO_HOST = "localhost"
+CLIENT_NAME = "zigbee2mqtt"
+
+def publish_message(topic, data):
+
+    #set the values
+    global TOPIC
+    global DATA
+
+    TOPIC = topic
+    DATA = data
+
+    #create the client to publish the message
+    client = mqtt.Client(CLIENT_NAME)
+
+    #set the callback method
+    client.on_connect=on_connect
+
+    #connect to the client
+    
+    client.connect(MOSQUITTO_HOST, 1883, 60)
+
+
+    #ensure the connection stays active till the message has been sent
+    client.loop_forever()
+
 
 def on_connect(client, userdata, flags, rc):
-    print("Connected to mqtt broker!")
-
+    
+    #After connection is established, publish the message
     publish_data(client)
-
-
-
 
 
 def publish_data(client):
 
-    data = {}
-    data["state"] = "OFF"
-    json_data = json.dumps(data)
+    client.publish(TOPIC, payload = json.dumps(DATA), qos = 0, retain=False)
 
-    print(json_data)
-
-    client.publish("zigbee2mqtt/0x804b50fffeb72fd9/set", payload = json_data, qos = 0, retain=False)
-
+    #close the connection after sending
     client.disconnect()
 
 
 
-client = mqtt.Client("zigbee2mqtt")
-client.on_connect=on_connect
-client.connect("localhost", 1883, 60)
-client.loop_forever()
+
 

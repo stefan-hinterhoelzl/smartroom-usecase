@@ -22,8 +22,8 @@ class Light(Base):
     light_id = Column(String, primary_key = True)
     turnon = Column(Boolean, nullable=False)
     name = Column(String, nullable=False)
-    color_x Column(Float, nullable=False)
-    color_y Column(Float, nullable=False)
+    color_x = Column(Float, nullable=False)
+    color_y = Column(Float, nullable=False)
     time = Column(DateTime, nullable=True)
 
     room = relationship('Room')

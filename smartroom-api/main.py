@@ -8,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from session import db_Session,conn 
 from databases import Database 
-from schema import Room,Airqualityproperty,Door,Light,Window,Ventilator,RoomToDoorRelations
-from fastAPI_models import Room_Object,Update_RoomObject,AirQuality_Properties_Object,AirQuality_Temperature_Object,AirQuality_Humidity_Object,AirQuality_Co2_Object,Doors_Object,Door_Operation_Object,Lights_Object,Light_Operation_Object,Windows_Object,Window_Operation_Object,Ventilators_Object,Ventilator_Operation_Object,Room_Door_Relation_Object,Room_Door_Operation_Object
+from schema import Room, Light
+from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object
 from typing import List
 from sqlalchemy import and_
 

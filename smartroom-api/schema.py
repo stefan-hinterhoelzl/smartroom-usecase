@@ -16,17 +16,26 @@ class Room(Base):
 
 
 class Light(Base):
-    __tablename__ = 'lights'
+    __tablename__ = 'light'
 
     room_id = Column(ForeignKey('room.room_id'), primary_key=True)
     light_id = Column(String, primary_key = True)
-    turnon = Column(Boolean, nullable=False)
     name = Column(String, nullable=False)
-    color_x Column(Float, nullable=False)
-    color_y Column(Float, nullable=False)
-    time = Column(DateTime, nullable=True)
 
     room = relationship('Room')
+
+class Light_Operation(Base):
+    __tablename__ = "light_operation"
+
+    light_id = Column(ForeignKey('lights.light_id'), primary_key = True)
+    time = Column(DateTime, primary_key=True)
+    turnon = Column(Boolean, nullable=False)
+    color_x Column(Float, nullable=False)
+    color_y Column(Float, nullable=False)
+    brightness Column(Integer, nullable=False)
+
+    light = relationship('Light')
+    
 
 class Motion_Sensors(Base):
     __tablename__ = 'motion_sensors'

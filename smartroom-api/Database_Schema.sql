@@ -4,17 +4,26 @@ CREATE TABLE Room(
 	room_Name varchar NOT NULL
 );
 				 		 
-CREATE TABLE Lights(
+CREATE TABLE Light(
 	room_id varchar NOT NULL,
 	light_id varchar NOT NULL,
-	turnOn bool NOT NULL,
 	name varchar NOT NULL,
-	color_x float NOT NULL,
-	color_y float NOT NULL,
-	time timestamp NOT NULL,
 	PRIMARY KEY (room_id, light_id),
 	FOREIGN KEY (room_id) REFERENCES Room (room_id)
 );
+
+CREATE TABLE Light_Operation(
+	light_id varchar NOT NULL,
+	time timestamp NOT NULL,
+	turnon BOOLEAN NOT NULL,
+	color_x FLOAT NOT NULL,
+	color_y FLOAT NOT NULL,
+	brightness INTEGER NOT NULL,
+	PRIMARY KEY (light_id, time),
+	FOREIGN KEY (light_id) REFERENCES Light (light_id)
+);
+
+
 
 CREATE TABLE Motion_Sensors(
     room_Id varchar NOT NULL,

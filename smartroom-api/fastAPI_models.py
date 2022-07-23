@@ -23,22 +23,26 @@ class Lights_Object(BaseModel):
     room_id: str
     light_id: str
     name: str
-    turnon:bool
-    brightness: int
-    color_x: float
-    color_y: float
-    time:Timestamp
+    
 
     class Config:
         orm_mode = True
+
+class Update_LightObject(BaseModel):
+    name: str
+
+    class Config:
+        orm_mode = True
+
 
 class Light_Operation_Object(BaseModel):
     turnon:bool
     brightness: int
     color_x: float
     color_y: float
-
     time:Timestamp
+
+    
     class Config:
         orm_mode = True        
 

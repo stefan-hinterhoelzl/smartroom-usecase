@@ -21,7 +21,7 @@ class Light(Base):
     room_id = Column(ForeignKey('room.room_id'), primary_key=True)
     light_id = Column(String, primary_key = True)
     name = Column(String, nullable=False)
-    #test
+    
     room = relationship('Room')
 
 class Light_Operation(Base):

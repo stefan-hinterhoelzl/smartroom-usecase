@@ -119,11 +119,7 @@ async def activate_Light(room_id: str, light_id: str):
         #Trigger the Action in Zigbee Network via the connector
 
         data = {}
-        if operation.turnon == True:
-            data["state"] = "ON"
-        else:
-            data["state"] = "OFF"
-        
+        data["state"] = "TOGGLE"
         topic = f"zigbee2mqtt/{light_id}/set" 
 
         publish_message(topic, data)
@@ -135,6 +131,45 @@ async def activate_Light(room_id: str, light_id: str):
         raise HTTPException(status_code=500,detail=f'Internal Server Error')
 
     return operation
+
+@app.post("/Room/{room_id}/Light/{light_id}/ComplexSetting", response_model=Light_Operation_Object, status_code=status.HTTP_200_OK)
+async def complex_setting_light(room_id: str, light_id: str, operation: Light_Operation_Object):
+
+    try:
+        operation = Light_Operation(light_id = light_id, room_id = room_id, time = datetime.now(), turnon = operation.turnon, color_x = operation.color_x, color_y = operation.color_y, brightness = operation.brightness)
+        
+        db_Session.add(operation)
+        db_Session.flush()
+        db_Session.commit()
+
+        #Trigger the Action in Zigbee Network via the connector
+
+        #Value Checking here
+
+        data = {}
+        data["state"] = "TOGGLE"
+        if operation.turnon == True:
+            data["state"] = "ON"
+        else:
+            data["state"] = "OFF"
+        color = {}
+        color["x"] = operation.color_x
+        color["y"] = operation.color_y
+        data["color"] = color
+        data["brightness"] = operation.brightness
+
+        topic = f"zigbee2mqtt/{light_id}/set" 
+        
+        publish_message(topic, data)
+
+    except Exception as ex:
+        logger.error(f"{ex.__class__.__name__}: {ex}")
+        db_Session.rollback()
+        #TBA Better Error Responding Here (and in general lol)
+        raise HTTPException(status_code=500,detail=f'Internal Server Error')
+    
+    return operation
+
 
 
 # @app.get("/Room/{room_id}/Light/{light_id}/", response_model=List[Lights_Object], status_code=status.HTTP_200_OK)

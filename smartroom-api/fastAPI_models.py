@@ -39,7 +39,6 @@ class Light_Operation_Object(BaseModel):
     brightness: int
     color_x: float
     color_y: float
-    time:Timestamp
 
     
     class Config:

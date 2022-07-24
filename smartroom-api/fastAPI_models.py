@@ -44,6 +44,16 @@ class Light_Operation_Object(BaseModel):
     class Config:
         orm_mode = True        
 
+class Light_Operation_Return_Object(BaseModel):
+    turnon:bool
+    brightness: int
+    color_x: float
+    color_y: float
+    time:Timestamp
+    
+    class Config:
+        orm_mode = True        
+
 class Motion_Sensors_Object(BaseModel):
     room_id: str
     sensor_id: str

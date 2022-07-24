@@ -24,6 +24,9 @@ CREATE TABLE Light_Operation(
 	FOREIGN KEY (room_id, light_id) REFERENCES Light (room_id, light_id)
 );
 
+SELECT create_hypertable('Light_Operation', 'time');
+CREATE INDEX ix_light_id_room_id_time ON Light_Operation (light_id, room_id, time DESC);
+
 CREATE TABLE Motion_Sensors(
     room_Id varchar NOT NULL,
 	sensor_Id varchar NOT NULL,

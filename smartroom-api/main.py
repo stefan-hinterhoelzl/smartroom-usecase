@@ -10,7 +10,7 @@ from config import settings
 from session import db_Session,conn 
 from databases import Database 
 from schema import Room, Light, Light_Operation
-from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object
+from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object, Light_Operation_Return_Object
 from typing import List
 from sqlalchemy import and_
 from publisher import publish_message
@@ -169,6 +169,19 @@ async def complex_setting_light(room_id: str, light_id: str, operation: Light_Op
         raise HTTPException(status_code=500,detail=f'Internal Server Error')
     
     return operation
+
+@app.get("/Room/{room_id}/Light/{light_id}/{from_t}/{to}", response_model=List[Light_Operation_Return_Object], status_code=status.HTTP_200_OK)
+async def get_light_data(room_id: str, light_id: str, to: int, from_t: int):
+
+    #conver to timestamp for comparison
+    to = datetime.fromtimestamp(to)
+    from_t = datetime.fromtimestamp(from_t)
+
+    results=db_Session.execute(
+        "SELECT * FROM Light_Operation WHERE room_id = :ri and light_id = :li and time < :to and time > :ft ORDER BY time desc", {'ri': room_id, 'li': light_id, 'to': to, 'ft': from_t}
+    )
+    return results         
+
 
 
 

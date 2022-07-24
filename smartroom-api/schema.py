@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import Boolean, Column, Float, DateTime, ForeignKey, Integer, String, Table
+from sqlalchemy import Boolean, Column, Float, DateTime, ForeignKey, Integer, String, Table, ForeignKeyConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -12,7 +12,7 @@ class Room(Base):
 
     room_id = Column(String, primary_key=True)
     room_size = Column(Integer, nullable=False)
-    measurement_unit = Column(String, nullable=False)
+    room_name = Column(String, nullable=False)
 
 
 class Light(Base):
@@ -20,19 +20,22 @@ class Light(Base):
 
     room_id = Column(ForeignKey('room.room_id'), primary_key=True)
     light_id = Column(String, primary_key = True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False) 
     
     room = relationship('Room')
 
 class Light_Operation(Base):
     __tablename__ = "light_operation"
 
-    light_id = Column(ForeignKey('lights.light_id'), primary_key = True)
+    light_id = Column(String, primary_key=True)
+    room_id = Column(String, nullable=False)
     time = Column(DateTime, primary_key=True)
     turnon = Column(Boolean, nullable=False)
-    color_x Column(Float, nullable=False)
-    color_y Column(Float, nullable=False)
-    brightness Column(Integer, nullable=False)
+    color_x = Column(Float, nullable=False)
+    color_y = Column(Float, nullable=False)
+    brightness = Column(Integer, nullable=False)
+
+    __table_args__ = (ForeignKeyConstraint([light_id, room_id], [Light.light_id, Light.room_id]), {})
 
     light = relationship('Light')
     

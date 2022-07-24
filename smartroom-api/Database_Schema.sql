@@ -14,16 +14,15 @@ CREATE TABLE Light(
 
 CREATE TABLE Light_Operation(
 	light_id varchar NOT NULL,
+	room_id varchar NOT NULL,
 	time timestamp NOT NULL,
 	turnon BOOLEAN NOT NULL,
 	color_x FLOAT NOT NULL,
 	color_y FLOAT NOT NULL,
 	brightness INTEGER NOT NULL,
 	PRIMARY KEY (light_id, time),
-	FOREIGN KEY (light_id) REFERENCES Light (light_id)
+	FOREIGN KEY (room_id, light_id) REFERENCES Light (room_id, light_id)
 );
-
-
 
 CREATE TABLE Motion_Sensors(
     room_Id varchar NOT NULL,

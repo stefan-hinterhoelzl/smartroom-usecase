@@ -8,10 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from session import db_Session,conn 
 from databases import Database 
-from schema import Room, Light
+from schema import Room, Light, Light_Operation
 from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object
 from typing import List
 from sqlalchemy import and_
+from publisher import publish_message
 
 database = Database(settings.DATABASE_URL)
 
@@ -28,13 +29,8 @@ app.add_middleware(
 cur = conn.cursor()
 
 
-@app.get("/Test/", status_code = status.HTTP_200_OK)
-async def test_call():
-    return {"code":"success","message":"updated room edit"}
-
-
 # room
-@app.post("/Rooms/",response_model=Room_Object, status_code = status.HTTP_201_CREATED)
+@app.post("/Rooms",response_model=Room_Object, status_code = status.HTTP_201_CREATED)
 async def add_Room(addRoom:Room_Object):
     db_classes = Room(room_id=addRoom.room_id,room_size=addRoom.room_size,room_name=addRoom.room_name)
     try:
@@ -47,7 +43,7 @@ async def add_Room(addRoom:Room_Object):
    
     return addRoom
  
-@app.get("/Rooms/", response_model=List[Room_Object], status_code = status.HTTP_200_OK)
+@app.get("/Rooms", response_model=List[Room_Object], status_code = status.HTTP_200_OK)
 async def get_AllRoom_Details():
     """ query = 'SELECT * FROM room'
     cur.execute(query)
@@ -56,19 +52,19 @@ async def get_AllRoom_Details():
     results=db_Session.query(Room).all()
     return results         
 
-@app.get("/Room/{room_id}/", response_model=List[Room_Object], status_code = status.HTTP_200_OK)
+@app.get("/Room/{room_id}", response_model=List[Room_Object], status_code = status.HTTP_200_OK)
 async def get_Specific_Room(room_id:str):
     specificRoomDetail=db_Session.query(Room).filter(Room.room_id==room_id).all()        
     return specificRoomDetail
 
-# @app.put("/Room/{room_id}",status_code = status.HTTP_200_OK)
-# async def update_RoomDetails(room_id:str,request:Update_RoomObject):
-#     updateRoomDetail=db_Session.query(Room).filter(Room.room_id==room_id)
-#     if not updateRoomDetail.first():
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Room with the id {room_id} is not available')
-#     updateRoomDetail.update({'room_size':request.room_size,'measurement_unit':request.measurement_unit})
-#     db_Session.commit()
-#     return {"code":"success","message":"updated room"}
+@app.put("/Room/{room_id}",status_code = status.HTTP_200_OK)
+async def update_RoomDetails(room_id:str,request:Update_RoomObject):
+    updateRoomDetail=db_Session.query(Room).filter(Room.room_id==room_id)
+    if not updateRoomDetail.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Room with the id {room_id} is not available')
+    updateRoomDetail.update({'room_size':request.room_size,'room_name':request.room_name})
+    db_Session.commit()
+    return {"code":"success","message":"updated room"}
 
 @app.delete("/Room/{room_id}", status_code = status.HTTP_200_OK)
 async def delete_Room(room_id:str):
@@ -80,24 +76,72 @@ async def delete_Room(room_id:str):
     return {"code":"success","message":f"deleted room with id {room_id}"} 
   
 
-# # lights
-# @app.post("/Room/Light/", response_model=Lights_Object, status_code=status.HTTP_201_CREATED)
-# async def add_light(addLight: Lights_Object):
-#     addLight=Light(room_id=addLight.room_id,light_id=addLight.light_id,turnon=addLight.turnon,energyconsumption=addLight.energyconsumption,energyconsumptionunit=addLight.energyconsumptionunit,time=addLight.time)
-#     try:
-#         db_Session.add(addLight)
-#         db_Session.flush()
-#         db_Session.commit()
-#     except Exception as ex:
-#         logger.error(f"{ex.__class__.__name__}: {ex}")
-#         db_Session.rollback()
+# lights
+@app.post("/Room/{room_id}/Lights", response_model=Lights_Object, status_code=status.HTTP_201_CREATED)
+async def add_light(room_id: str, addLight: Lights_Object):
+    addLight=Light(room_id=room_id,light_id=addLight.light_id, name=addLight.name)
+    try:
+        db_Session.add(addLight)
+        db_Session.flush()
+        db_Session.commit()
+    except Exception as ex:
+        logger.error(f"{ex.__class__.__name__}: {ex}")
+        db_Session.rollback()
     
-#     return addLight
+    return addLight
 
-# @app.get("/Room/{room_id}/Light/", response_model=List[Lights_Object], status_code=status.HTTP_200_OK)
-# async def get_All_Lights(room_id: str):
-#     getAllLights=db_Session.query(Light).filter(Light.room_id==room_id).all()
-#     return getAllLights
+@app.get("/Room/{room_id}/Lights", response_model=List[Lights_Object], status_code=status.HTTP_200_OK)
+async def get_All_Lights(room_id: str):
+    getAllLights=db_Session.query(Light).filter(Light.room_id==room_id).all()
+    return getAllLights
+
+
+@app.post("/Room/{room_id}/Light/{light_id}/isActive", response_model=Light_Operation_Object, status_code=status.HTTP_200_OK)
+async def activate_Light(room_id: str, light_id: str):
+    operation = Light_Operation(light_id = light_id, room_id = room_id, time = datetime.now(), turnon = True, color_x = 0.1, color_y = 0.1, brightness = 200)
+    try:
+        db_Session.add(operation)
+        db_Session.flush()
+        db_Session.commit()
+
+         #Trigger the Action in Zigbee Network via the connector
+
+        data = {}
+        data["state"] = "ON"
+        topic = "zigbee2mqtt/0x804b50fffeb72fd9/set" #hardcoded for now AUFPASSEN -CHANGE LATER!
+        publish_message(topic, data)
+
+    except Exception as ex:
+        logger.error(f"{ex.__class__.__name__}: {ex}")
+        db_Session.rollback()
+        #TBA Better Error Responding Here (and in general lol)
+        raise HTTPException(status_code=500,detail=f'Internal Server Error')
+
+    return operation
+
+@app.post("/Room/{room_id}/Light/{light_id}/isInactive", response_model=Light_Operation_Object, status_code=status.HTTP_200_OK)
+async def activate_Light(room_id: str, light_id: str):
+    operation = Light_Operation(light_id = light_id, room_id = room_id, time = datetime.now(), turnon = False, color_x = 0.1, color_y = 0.1, brightness = 200)
+    try:
+        db_Session.add(operation)
+        db_Session.flush()
+        db_Session.commit()
+
+        #Trigger the Action in Zigbee Network via the connector
+
+        data = {}
+        data["state"] = "OFF"
+        topic = "zigbee2mqtt/0x804b50fffeb72fd9/set" #hardcoded for now AUFPASSEN -CHANGE LATER!
+        publish_message(topic, data)
+
+    except Exception as ex:
+        logger.error(f"{ex.__class__.__name__}: {ex}")
+        db_Session.rollback()
+        #TBA Better Error Responding Here (and in general lol)
+        raise HTTPException(status_code=500,detail=f'Internal Server Error')
+
+    return operation
+
 
 # @app.get("/Room/{room_id}/Light/{light_id}/", response_model=List[Lights_Object], status_code=status.HTTP_200_OK)
 # async def get_Specific_Light(room_id: str,light_id: str):

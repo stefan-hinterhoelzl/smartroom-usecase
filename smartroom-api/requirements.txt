@@ -13,3 +13,4 @@ python-dotenv==0.19.2
 #zigpy
 zigpy==0.45.1
 zigpy-znp==0.7.0
+paho-mqtt==1.6.1

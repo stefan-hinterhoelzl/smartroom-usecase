@@ -20,7 +20,6 @@ class Update_RoomObject(BaseModel):
         orm_mode = True
 
 class Lights_Object(BaseModel):
-    room_id: str
     light_id: str
     name: str
     

@@ -1,6 +1,7 @@
 from ast import And
 from asyncio.log import logger
 from datetime import datetime
+import pytz
 import uvicorn
 import asyncio
 from fastapi import FastAPI, HTTPException, status
@@ -27,6 +28,7 @@ app.add_middleware(
 
 
 cur = conn.cursor()
+
 
 
 # room
@@ -96,33 +98,20 @@ async def get_All_Lights(room_id: str):
     return getAllLights
 
 
-@app.post("/Room/{room_id}/Light/{light_id}/isActive", response_model=Light_Operation_Object, status_code=status.HTTP_200_OK)
+#  lights operation
+
+@app.post("/Room/{room_id}/Light/{light_id}/Activation", response_model=Light_Operation_Object, status_code=status.HTTP_200_OK)
 async def activate_Light(room_id: str, light_id: str):
-    operation = Light_Operation(light_id = light_id, room_id = room_id, time = datetime.now(), turnon = True, color_x = 0.1, color_y = 0.1, brightness = 200)
+    
     try:
-        db_Session.add(operation)
-        db_Session.flush()
-        db_Session.commit()
+        last_operation: Light_Operation_Object = db_Session.query(Light_Operation).filter(Light_Operation.light_id==light_id, Light_Operation.room_id == room_id).order_by(Light_Operation.time.desc()).first()
 
-         #Trigger the Action in Zigbee Network via the connector
+        if last_operation == None:
+            operation = Light_Operation(light_id = light_id, room_id = room_id, time = datetime.now(), turnon = False, color_x = 0.1, color_y = 0.1, brightness = 200)
+        else:
+            operation = Light_Operation(light_id = light_id, room_id = room_id, time = datetime.now(), turnon = not last_operation.turnon, color_x = last_operation.color_x, color_y = last_operation.color_y, brightness = last_operation.brightness)
 
-        data = {}
-        data["state"] = "ON"
-        topic = "zigbee2mqtt/0x804b50fffeb72fd9/set" #hardcoded for now AUFPASSEN -CHANGE LATER!
-        publish_message(topic, data)
 
-    except Exception as ex:
-        logger.error(f"{ex.__class__.__name__}: {ex}")
-        db_Session.rollback()
-        #TBA Better Error Responding Here (and in general lol)
-        raise HTTPException(status_code=500,detail=f'Internal Server Error')
-
-    return operation
-
-@app.post("/Room/{room_id}/Light/{light_id}/isInactive", response_model=Light_Operation_Object, status_code=status.HTTP_200_OK)
-async def activate_Light(room_id: str, light_id: str):
-    operation = Light_Operation(light_id = light_id, room_id = room_id, time = datetime.now(), turnon = False, color_x = 0.1, color_y = 0.1, brightness = 200)
-    try:
         db_Session.add(operation)
         db_Session.flush()
         db_Session.commit()
@@ -130,8 +119,13 @@ async def activate_Light(room_id: str, light_id: str):
         #Trigger the Action in Zigbee Network via the connector
 
         data = {}
-        data["state"] = "OFF"
-        topic = "zigbee2mqtt/0x804b50fffeb72fd9/set" #hardcoded for now AUFPASSEN -CHANGE LATER!
+        if operation.turnon == True:
+            data["state"] = "ON"
+        else:
+            data["state"] = "OFF"
+        
+        topic = f"zigbee2mqtt/{light_id}/set" 
+
         publish_message(topic, data)
 
     except Exception as ex:

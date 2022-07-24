@@ -7,7 +7,7 @@ import json
 TOPIC = ""
 DATA = {}
 #****Change Host IP if necessary here****
-MOSQUITTO_HOST = "localhost"
+MOSQUITTO_HOST = "192.168.1.35"
 CLIENT_NAME = "zigbee2mqtt"
 
 def publish_message(topic, data):
@@ -26,9 +26,9 @@ def publish_message(topic, data):
     client.on_connect=on_connect
 
     #connect to the client
-    
+   
     client.connect(MOSQUITTO_HOST, 1883, 60)
-
+    
 
     #ensure the connection stays active till the message has been sent
     client.loop_forever()

@@ -10,9 +10,9 @@ from config import settings
 from session import db_Session,conn 
 from databases import Database 
 from schema import Room, Light, Light_Operation
-from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object, Light_Operation_Return_Object
+from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object, Light_Operation_Return_Object, Update_LightObject
 from typing import List
-from sqlalchemy import and_
+from sqlalchemy import and_, text
 from publisher import publish_message
 
 database = Database(settings.DATABASE_URL)
@@ -92,10 +92,37 @@ async def add_light(room_id: str, addLight: Lights_Object):
     
     return addLight
 
+
 @app.get("/Room/{room_id}/Lights", response_model=List[Lights_Object], status_code=status.HTTP_200_OK)
 async def get_All_Lights(room_id: str):
     getAllLights=db_Session.query(Light).filter(Light.room_id==room_id).all()
     return getAllLights
+
+@app.get("/Room/{room_id}/Light/{light_id}/", response_model=Lights_Object, status_code=status.HTTP_200_OK)
+async def get_Specific_Light(room_id: str,light_id: str):
+    getSpecificLight=db_Session.query(Light).filter(Light.room_id==room_id,Light.light_id==light_id)
+    if not getSpecificLight.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Light with the id {light_id} is not available in room {room_id}')
+    return getSpecificLight
+
+
+@app.put("/Room/{room_id}/Light/{light_id}", status_code=status.HTTP_200_OK)
+async def update_light(room_id: str,light_id:str,request: Update_LightObject):
+    updateLight=db_Session.query(Light).filter(Light.room_id==room_id,Light.light_id==light_id)
+    if not updateLight.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Light with the id {light_id} is not available in room {room_id}')
+    updateLight.update({'name':request.name})
+    db_Session.commit()
+    return updateLight
+
+@app.delete("/Room/{room_id}/Light/{light_id}", status_code=status.HTTP_200_OK)
+async def delete_light(room_id: str,light_id: str):
+    deleteLight=db_Session.query(Light).filter(Light.room_id==room_id,Light.light_id==light_id).one()
+    if not delete_light:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Light with the id {light_id} is not available in room {room_id}') 
+    db_Session.delete(deleteLight)
+    db_Session.commit()
+    return {"code":"success","message":f"deleted light with id {light_id} from room {room_id}"} 
 
 
 #  lights operation
@@ -147,7 +174,6 @@ async def complex_setting_light(room_id: str, light_id: str, operation: Light_Op
         #Value Checking here
 
         data = {}
-        data["state"] = "TOGGLE"
         if operation.turnon == True:
             data["state"] = "ON"
         else:
@@ -177,41 +203,12 @@ async def get_light_data(room_id: str, light_id: str, to: int, from_t: int):
     to = datetime.fromtimestamp(to)
     from_t = datetime.fromtimestamp(from_t)
 
-    results=db_Session.execute(
-        "SELECT * FROM Light_Operation WHERE room_id = :ri and light_id = :li and time < :to and time > :ft ORDER BY time desc", {'ri': room_id, 'li': light_id, 'to': to, 'ft': from_t}
-    )
+    results=db_Session.query(Light_Operation).from_statement(
+        text("""SELECT * FROM Light_Operation WHERE room_id = :ri and light_id = :li and time < :to and time > :ft ORDER BY time desc""")
+    ).params(ri=room_id, li=light_id, to=to, ft=from_t).all()
+
     return results         
 
-
-
-
-# @app.get("/Room/{room_id}/Light/{light_id}/", response_model=List[Lights_Object], status_code=status.HTTP_200_OK)
-# async def get_Specific_Light(room_id: str,light_id: str):
-#     getSpecificLight=db_Session.query(Light).filter(Light.room_id==room_id,Light.light_id==light_id).all()
-#     return getSpecificLight
-
-# @app.get("/Room{room_id}/Light{light_id}/isOn{timestamp}", response_model=Lights_Object, status_code=status.HTTP_200_OK)
-# async def check_Light(room_id: str,light_id: str,time:datetime):
-#     checkLight=db_Session.query(Light).filter(Light.room_id==room_id,Light.light_id==light_id,Light.time==time)
-#     return checkLight      
-
-# @app.put("/Room/{room_id}/Light/{light_id}", status_code=status.HTTP_200_OK)
-# async def update_light(room_id: str,light_id:str,request: Light_Operation_Object):
-#     updateLight=db_Session.query(Light).filter(Light.room_id==room_id,Light.light_id==light_id)
-#     if not updateLight.first():
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Light with the id {light_id} is not available in room {room_id}')
-#     updateLight.update({'turnon':request.turnon,'time':request.time})
-#     db_Session.commit()
-#     return {"code":"success","message":"updated light settings"}
- 
-# @app.delete("/Room/{room_id}/Light/{light_id}", status_code=status.HTTP_200_OK)
-# async def delete_light(room_id: str,light_id: str):
-#     deleteLight=db_Session.query(Light).filter(Light.room_id==room_id,Light.light_id==light_id).one()
-#     if not delete_light:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Light with the id {light_id} is not available in room {room_id}') 
-#     db_Session.delete(deleteLight)
-#     db_Session.commit()
-#     return {"code":"success","message":f"deleted light with id {light_id} from room {room_id}"} 
   
 # # windows
 # @app.post("/Room/Windows/", response_model=Windows_Object, status_code=status.HTTP_201_CREATED)

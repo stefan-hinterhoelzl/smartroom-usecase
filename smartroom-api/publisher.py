@@ -8,7 +8,7 @@ TOPIC = ""
 DATA = {}
 #****Change Host IP if necessary here****
 MOSQUITTO_HOST = "192.168.1.35"
-CLIENT_NAME = "zigbee2mqtt"
+CLIENT_NAME = "publisher"
 
 def publish_message(topic, data):
 

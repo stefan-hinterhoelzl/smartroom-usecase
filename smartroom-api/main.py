@@ -1,4 +1,5 @@
 from ast import And
+import os
 from asyncio.log import logger
 from datetime import datetime
 import pytz
@@ -7,10 +8,10 @@ import asyncio
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
-from session import db_Session,conn 
-from databases import Database 
+from session import db_Session, conn
+from databases import Database
 from schema import Room, Light, Light_Operation
-from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object, Light_Operation_Return_Object, Update_LightObject
+from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object, Light_Operation_Return_Object, Update_LightObject, Light_Operation_Query_Object, Light_Operation_Storing_Object
 from typing import List
 from sqlalchemy import and_, text
 from publisher import publish_message
@@ -29,12 +30,15 @@ app.add_middleware(
 
 cur = conn.cursor()
 
+# Execute the Subscriber
+# os.system("./subscriber.py")
 
 
 # room
-@app.post("/Rooms",response_model=Room_Object, status_code = status.HTTP_201_CREATED)
-async def add_Room(addRoom:Room_Object):
-    db_classes = Room(room_id=addRoom.room_id,room_size=addRoom.room_size,room_name=addRoom.room_name)
+@app.post("/Rooms", response_model=Room_Object, status_code=status.HTTP_201_CREATED)
+async def add_Room(addRoom: Room_Object):
+    db_classes = Room(room_id=addRoom.room_id,
+                      room_size=addRoom.room_size, room_name=addRoom.room_name)
     try:
         db_Session.add(db_classes)
         db_Session.flush()
@@ -42,46 +46,55 @@ async def add_Room(addRoom:Room_Object):
     except Exception as ex:
         logger.error(f"{ex.__class__.__name__}: {ex}")
         db_Session.rollback()
-   
+
     return addRoom
- 
-@app.get("/Rooms", response_model=List[Room_Object], status_code = status.HTTP_200_OK)
+
+
+@app.get("/Rooms", response_model=List[Room_Object], status_code=status.HTTP_200_OK)
 async def get_AllRoom_Details():
     """ query = 'SELECT * FROM room'
     cur.execute(query)
     for i in cur:
         print(i) """
-    results=db_Session.query(Room).all()
-    return results         
+    results = db_Session.query(Room).all()
+    return results
 
-@app.get("/Room/{room_id}", response_model=List[Room_Object], status_code = status.HTTP_200_OK)
-async def get_Specific_Room(room_id:str):
-    specificRoomDetail=db_Session.query(Room).filter(Room.room_id==room_id).all()        
+
+@app.get("/Rooms/{room_id}", response_model=List[Room_Object], status_code=status.HTTP_200_OK)
+async def get_Specific_Room(room_id: str):
+    specificRoomDetail = db_Session.query(
+        Room).filter(Room.room_id == room_id).all()
     return specificRoomDetail
 
-@app.put("/Room/{room_id}",status_code = status.HTTP_200_OK)
-async def update_RoomDetails(room_id:str,request:Update_RoomObject):
-    updateRoomDetail=db_Session.query(Room).filter(Room.room_id==room_id)
-    if not updateRoomDetail.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Room with the id {room_id} is not available')
-    updateRoomDetail.update({'room_size':request.room_size,'room_name':request.room_name})
-    db_Session.commit()
-    return {"code":"success","message":"updated room"}
 
-@app.delete("/Room/{room_id}", status_code = status.HTTP_200_OK)
-async def delete_Room(room_id:str):
-    deleteRoom=db_Session.query(Room).filter(Room.room_id==room_id).one()
+@app.put("/Rooms/{room_id}", status_code=status.HTTP_200_OK)
+async def update_RoomDetails(room_id: str, request: Update_RoomObject):
+    updateRoomDetail = db_Session.query(Room).filter(Room.room_id == room_id)
+    if not updateRoomDetail.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Room with the id {room_id} is not available')
+    updateRoomDetail.update(
+        {'room_size': request.room_size, 'room_name': request.room_name})
+    db_Session.commit()
+    return {"code": "success", "message": "updated room"}
+
+
+@app.delete("/Rooms/{room_id}", status_code=status.HTTP_200_OK)
+async def delete_Room(room_id: str):
+    deleteRoom = db_Session.query(Room).filter(Room.room_id == room_id).one()
     if not deleteRoom:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Room with the room id {room_id} is not found')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Room with the room id {room_id} is not found')
     db_Session.delete(deleteRoom)
     db_Session.commit()
-    return {"code":"success","message":f"deleted room with id {room_id}"} 
-  
+    return {"code": "success", "message": f"deleted room with id {room_id}"}
+
 
 # lights
-@app.post("/Room/{room_id}/Lights", response_model=Lights_Object, status_code=status.HTTP_201_CREATED)
+@app.post("/Rooms/{room_id}/Lights", response_model=Lights_Object, status_code=status.HTTP_201_CREATED)
 async def add_light(room_id: str, addLight: Lights_Object):
-    addLight=Light(room_id=room_id,light_id=addLight.light_id, name=addLight.name)
+    addLight = Light(
+        room_id=room_id, light_id=addLight.light_id, name=addLight.name)
     try:
         db_Session.add(addLight)
         db_Session.flush()
@@ -89,127 +102,143 @@ async def add_light(room_id: str, addLight: Lights_Object):
     except Exception as ex:
         logger.error(f"{ex.__class__.__name__}: {ex}")
         db_Session.rollback()
-    
+
     return addLight
 
 
-@app.get("/Room/{room_id}/Lights", response_model=List[Lights_Object], status_code=status.HTTP_200_OK)
+@app.get("/Rooms/{room_id}/Lights", response_model=List[Lights_Object], status_code=status.HTTP_200_OK)
 async def get_All_Lights(room_id: str):
-    getAllLights=db_Session.query(Light).filter(Light.room_id==room_id).all()
+    getAllLights = db_Session.query(Light).filter(
+        Light.room_id == room_id).all()
     return getAllLights
 
-@app.get("/Room/{room_id}/Light/{light_id}/", response_model=Lights_Object, status_code=status.HTTP_200_OK)
-async def get_Specific_Light(room_id: str,light_id: str):
-    getSpecificLight=db_Session.query(Light).filter(Light.room_id==room_id,Light.light_id==light_id)
+
+@app.get("/Rooms/{room_id}/Lights/{light_id}/", response_model=Lights_Object, status_code=status.HTTP_200_OK)
+async def get_Specific_Light(room_id: str, light_id: str):
+    getSpecificLight = db_Session.query(Light).filter(
+        Light.room_id == room_id, Light.light_id == light_id)
     if not getSpecificLight.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Light with the id {light_id} is not available in room {room_id}')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Light with the id {light_id} is not available in room {room_id}')
     return getSpecificLight
 
 
-@app.put("/Room/{room_id}/Light/{light_id}", status_code=status.HTTP_200_OK)
-async def update_light(room_id: str,light_id:str,request: Update_LightObject):
-    updateLight=db_Session.query(Light).filter(Light.room_id==room_id,Light.light_id==light_id)
+@app.put("/Rooms/{room_id}/Lights/{light_id}", status_code=status.HTTP_200_OK)
+async def update_light(room_id: str, light_id: str, request: Update_LightObject):
+    updateLight = db_Session.query(Light).filter(
+        Light.room_id == room_id, Light.light_id == light_id)
     if not updateLight.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Light with the id {light_id} is not available in room {room_id}')
-    updateLight.update({'name':request.name})
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Light with the id {light_id} is not available in room {room_id}')
+    updateLight.update({'name': request.name})
     db_Session.commit()
     return updateLight
 
-@app.delete("/Room/{room_id}/Light/{light_id}", status_code=status.HTTP_200_OK)
-async def delete_light(room_id: str,light_id: str):
-    deleteLight=db_Session.query(Light).filter(Light.room_id==room_id,Light.light_id==light_id).one()
+
+@app.delete("/Rooms/{room_id}/Lights/{light_id}", status_code=status.HTTP_200_OK)
+async def delete_light(room_id: str, light_id: str):
+    deleteLight = db_Session.query(Light).filter(
+        Light.room_id == room_id, Light.light_id == light_id).one()
     if not delete_light:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Light with the id {light_id} is not available in room {room_id}') 
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Light with the id {light_id} is not available in room {room_id}')
     db_Session.delete(deleteLight)
     db_Session.commit()
-    return {"code":"success","message":f"deleted light with id {light_id} from room {room_id}"} 
+    return {"code": "success", "message": f"deleted light with id {light_id} from room {room_id}"}
 
 
 #  lights operation
 
-@app.post("/Room/{room_id}/Light/{light_id}/Activation", response_model=Light_Operation_Object, status_code=status.HTTP_200_OK)
+@app.post("/Rooms/{room_id}/Lights/{light_id}/Activation", status_code=status.HTTP_200_OK)
 async def activate_Light(room_id: str, light_id: str):
-    
-    try:
-        last_operation: Light_Operation_Object = db_Session.query(Light_Operation).filter(Light_Operation.light_id==light_id, Light_Operation.room_id == room_id).order_by(Light_Operation.time.desc()).first()
 
-        if last_operation == None:
-            operation = Light_Operation(light_id = light_id, room_id = room_id, time = datetime.now(), turnon = False, color_x = 0.1, color_y = 0.1, brightness = 200)
-        else:
-            operation = Light_Operation(light_id = light_id, room_id = room_id, time = datetime.now(), turnon = not last_operation.turnon, color_x = last_operation.color_x, color_y = last_operation.color_y, brightness = last_operation.brightness)
+    data = {}
+    data["state"] = "TOGGLE"
+    topic = f"zigbee2mqtt/{light_id}/set"
+
+    publish_message(topic, data)
+
+    return {"code": "success", "message": "Device toggled"}
 
 
-        db_Session.add(operation)
-        db_Session.flush()
-        db_Session.commit()
-
-        #Trigger the Action in Zigbee Network via the connector
-
-        data = {}
-        data["state"] = "TOGGLE"
-        topic = f"zigbee2mqtt/{light_id}/set" 
-
-        publish_message(topic, data)
-
-    except Exception as ex:
-        logger.error(f"{ex.__class__.__name__}: {ex}")
-        db_Session.rollback()
-        #TBA Better Error Responding Here (and in general lol)
-        raise HTTPException(status_code=500,detail=f'Internal Server Error')
-
-    return operation
-
-@app.post("/Room/{room_id}/Light/{light_id}/ComplexSetting", response_model=Light_Operation_Object, status_code=status.HTTP_200_OK)
+@app.post("/Rooms/{room_id}/Lights/{light_id}/ComplexSetting", status_code=status.HTTP_200_OK)
 async def complex_setting_light(room_id: str, light_id: str, operation: Light_Operation_Object):
 
+    data = {}
+    if operation.turnon == True:
+        data["state"] = "ON"
+    else:
+        data["state"] = "OFF"
+    color = {}
+    color["hex"] = operation.hex
+    data["color"] = color
+    data["brightness"] = operation.brightness
+
+    topic = f"zigbee2mqtt/{light_id}/set"
+
+    publish_message(topic, data)
+
+    return {"code": "success", "message": "Device Settings changed"}
+
+
+@app.post("/Rooms/{room_id}/Lights/{light_id}/GetOperations", response_model=List[Light_Operation_Return_Object], status_code=status.HTTP_200_OK)
+async def get_light_data(room_id: str, light_id: str, request: Light_Operation_Query_Object):
+
+    if request.timespan_from != 0 and request.timespan_to != 0 and request.interval == 0:
+
+        # conver to timestamp for comparison
+        to = datetime.fromtimestamp(to)
+        from_t = datetime.fromtimestamp(from_t)
+
+        results = db_Session.query(Light_Operation).from_statement(
+            text("""SELECT * FROM Light_Operation WHERE room_id = :ri and light_id = :li and time < :to and time > :ft ORDER BY time desc""")
+        ).params(ri=room_id, li=light_id, to=request.timespan_to, ft=request.timespan_from).all()
+
+        return results
+
+    elif request.timespan_from == 0 and request.timespan_to == 0 and request.interval > 0:
+
+        results = db_Session.query(Light_Operation).from_statement(
+            text("""SELECT * FROM Light_Operation WHERE light_id = :li and time > now() - INTERVAL ':interval days' ORDER BY time desc""")
+        ).params(interval=request.interval, ri=room_id, li=light_id).all()
+
+        return results
+
+    elif request.timespan_from == 0 and request.timespan_to == 0 and request.interval == 0:
+        results = db_Session.query(Light_Operation).filter(Light_Operation.room_id == room_id,
+                                                           Light_Operation.light_id == light_id).order_by(Light_Operation.time.desc()).all()
+        return results
+
+    else:
+        raise HTTPException(
+            status_code=400, detail=f'Bad arguments. Pass one value for interval, both values for from and to, or none for all data for the device.')
+
+
+@app.post("/Rooms/{room_id}/Lights/{light_id}/ManualSavestate", status_code = status.HTTP_200_OK)
+async def get_status_of_light(room_id: str, light_id: str):
+
+    data = {}
+    data["state"] = " "
+    topic = f"zigbee2mqtt/{light_id}/get"
+
+    publish_message(topic, data)
+
+
+@app.post("/Rooms/{room_id}/Lights/{light_id}/Operations", status_code = status.HTTP_200_OK)
+async def post_operation_data_lights(room_id: str, light_id: str, body: Light_Operation_Storing_Object):
+    new_operation = Light_Operation(room_id=room_id, light_id=light_id, time=datetime.now(), 
+    turnon=body.turnon, color_y=body.color_y, color_x=body.color_x, brightness=body.brightness)
     try:
-        operation = Light_Operation(light_id = light_id, room_id = room_id, time = datetime.now(), turnon = operation.turnon, color_x = operation.color_x, color_y = operation.color_y, brightness = operation.brightness)
-        
-        db_Session.add(operation)
+        db_Session.add(new_operation)
         db_Session.flush()
         db_Session.commit()
-
-        #Trigger the Action in Zigbee Network via the connector
-
-        #Value Checking here
-
-        data = {}
-        if operation.turnon == True:
-            data["state"] = "ON"
-        else:
-            data["state"] = "OFF"
-        color = {}
-        color["x"] = operation.color_x
-        color["y"] = operation.color_y
-        data["color"] = color
-        data["brightness"] = operation.brightness
-
-        topic = f"zigbee2mqtt/{light_id}/set" 
-        
-        publish_message(topic, data)
-
     except Exception as ex:
         logger.error(f"{ex.__class__.__name__}: {ex}")
         db_Session.rollback()
-        #TBA Better Error Responding Here (and in general lol)
-        raise HTTPException(status_code=500,detail=f'Internal Server Error')
-    
-    return operation
 
-@app.get("/Room/{room_id}/Light/{light_id}/{from_t}/{to}", response_model=List[Light_Operation_Return_Object], status_code=status.HTTP_200_OK)
-async def get_light_data(room_id: str, light_id: str, to: int, from_t: int):
+    return new_operation
 
-    #conver to timestamp for comparison
-    to = datetime.fromtimestamp(to)
-    from_t = datetime.fromtimestamp(from_t)
 
-    results=db_Session.query(Light_Operation).from_statement(
-        text("""SELECT * FROM Light_Operation WHERE room_id = :ri and light_id = :li and time < :to and time > :ft ORDER BY time desc""")
-    ).params(ri=room_id, li=light_id, to=to, ft=from_t).all()
-
-    return results         
-
-  
 # # windows
 # @app.post("/Room/Windows/", response_model=Windows_Object, status_code=status.HTTP_201_CREATED)
 # async def create_Windows(addWindows: Windows_Object):
@@ -221,13 +250,13 @@ async def get_light_data(room_id: str, light_id: str, to: int, from_t: int):
 #     except Exception as ex:
 #         logger.error(f"{ex.__class__.__name__}: {ex}")
 #         db_Session.rollback()
-    
+
 #     return addWindows
 
 # @app.get("/Room/{room_id}/Windows/", response_model=List[Windows_Object], status_code=status.HTTP_200_OK)
 # async def get_All_Windows(room_id: str):
 #     get_AllWindow=db_Session.query(Window).filter(Window.room_id==room_id).all()
-#     return get_AllWindow    
+#     return get_AllWindow
 
 # @app.get("/Room/{room_id}/Windows/{window_id}/", response_model=List[Windows_Object], status_code=status.HTTP_200_OK)
 # async def get_Specific_Window(room_id: str,window_id:str):
@@ -250,8 +279,8 @@ async def get_light_data(room_id: str, light_id: str, to: int, from_t: int):
 #         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Window with the id {window_id} is not available in room {room_id}')
 #     db_Session.delete(deleteWindow)
 #     db_Session.commit()
-#     return {"code":"success","message":f"deleted window with id {window_id} from room {room_id}"} 
- 
+#     return {"code":"success","message":f"deleted window with id {window_id} from room {room_id}"}
+
 # #ventilators
 # @app.post("/Room/Ventilators/", response_model=Ventilators_Object, status_code=status.HTTP_201_CREATED)
 # async def create_Ventilators(addVentilators: Ventilators_Object):
@@ -263,7 +292,7 @@ async def get_light_data(room_id: str, light_id: str, to: int, from_t: int):
 #     except Exception as ex:
 #         logger.error(f"{ex.__class__.__name__}: {ex}")
 #         db_Session.rollback()
-#     return addVentilators 
+#     return addVentilators
 
 # @app.get("/Room/{room_id}/Ventilators/", response_model=List[Ventilators_Object], status_code=status.HTTP_200_OK)
 # async def get_All_Ventilators(room_id:str):
@@ -291,7 +320,7 @@ async def get_light_data(room_id: str, light_id: str, to: int, from_t: int):
 #         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Ventilator with the id {ventilator_id} is not available in room {room_id}')
 #     db_Session.delete(deleteVentilator)
 #     db_Session.commit()
-#     return {"code":"success","message":f"deleted ventilator with id {ventilator_id} from room {room_id}"} 
+#     return {"code":"success","message":f"deleted ventilator with id {ventilator_id} from room {room_id}"}
 
 # # doors
 # @app.post("/Room/Doors/", response_model=Doors_Object, status_code=status.HTTP_201_CREATED)
@@ -359,4 +388,3 @@ async def get_light_data(room_id: str, light_id: str, to: int, from_t: int):
 #    db_Session.delete(deleteRoomDoorRelation)
 #    db_Session.commit()
 #    return {"code":"success","message":f"deleted room to door relation with room id {room_id} and door id {door_id}"}
-

@@ -17,8 +17,8 @@ CREATE TABLE Light_Operation(
 	room_id varchar NOT NULL,
 	time timestamp NOT NULL,
 	turnon BOOLEAN NOT NULL,
-	color_x FLOAT NOT NULL,
-	color_y FLOAT NOT NULL,
+	color_x DECIMAL NOT NULL,
+	color_y DECIMAL NOT NULL,
 	brightness INTEGER NOT NULL,
 	PRIMARY KEY (light_id, time),
 	FOREIGN KEY (room_id, light_id) REFERENCES Light (room_id, light_id)

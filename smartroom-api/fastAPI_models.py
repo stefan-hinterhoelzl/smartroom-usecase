@@ -37,22 +37,39 @@ class Update_LightObject(BaseModel):
 class Light_Operation_Object(BaseModel):
     turnon:bool
     brightness: int
-    color_x: float
-    color_y: float
+    hex: str
 
     
     class Config:
         orm_mode = True        
+
+class Light_Operation_Storing_Object(BaseModel):
+    turnon:bool
+    brightness: int
+    color_x: float
+    color_y: float
+
+    class Config:
+        orm_mode = True  
 
 class Light_Operation_Return_Object(BaseModel):
     turnon:bool
     brightness: int
     color_x: float
     color_y: float
-    time:Timestamp
+    time: Timestamp
     
     class Config:
-        orm_mode = True        
+        orm_mode = True
+
+
+
+class Light_Operation_Query_Object(BaseModel):
+    interval: int
+    timespan_from: int
+    timespan_to: int
+    
+
 
 class Motion_Sensors_Object(BaseModel):
     room_id: str

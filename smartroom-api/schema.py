@@ -31,8 +31,8 @@ class Light_Operation(Base):
     room_id = Column(String, nullable=False)
     time = Column(DateTime, primary_key=True)
     turnon = Column(Boolean, nullable=False)
-    color_x = Column(Float, nullable=False)
     color_y = Column(Float, nullable=False)
+    color_x = Column(Float, nullable=False)
     brightness = Column(Integer, nullable=False)
 
     __table_args__ = (ForeignKeyConstraint([light_id, room_id], [Light.light_id, Light.room_id]), {})

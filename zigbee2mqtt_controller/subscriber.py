@@ -10,9 +10,14 @@ BASE_URL = "http://localhost:8000/Rooms/"
 # Add new Devices here
 devices_types = {}
 devices_types["0x804b50fffeb72fd9"] = "Lights"
+devices_types["0xbc33acfffe0c1493"] = "Motion_Sensors"
+devices_types["0xbc33acfffe108988"] = "Motion_Sensors"
 
 devices_rooms = {}
 devices_rooms["0x804b50fffeb72fd9"] = "1"
+devices_rooms["0xbc33acfffe0c1493"] = "1"
+devices_rooms["0xbc33acfffe108988"] = "1"
+
 
 
 def on_message(client, userdata, message):
@@ -28,7 +33,10 @@ def on_message(client, userdata, message):
         # map to the correct data type
         if device_group == "Lights":
             data = {}
-            data["turnon"] = bool(payload["state"])
+            if payload["state"] == "OFF":
+                data["turnon"] = False
+            else:
+                data["turnon"] = True
             data["brightness"] = int(payload["brightness"])
             data["color_x"] = float(payload["color"]["x"])
             data["color_y"] = float(payload["color"]["y"])
@@ -37,7 +45,16 @@ def on_message(client, userdata, message):
             
             res = requests.post(
                 f"{BASE_URL}{device_room}/Lights/{device}/Operations", json=data)
+        
+        elif device_group == "Motion_Sensors":
+            data = {}
+            data["detection"] = bool(payload["occupancy"])
+            
+            print(data)
 
+            res = requests.post(
+                f"{BASE_URL}{device_room}/Motion_Sensors/{device}/Operations", json=data)
+            
 
 def on_connect(client, userdata, flags, rc):
     print("Connected to mqtt broker!")

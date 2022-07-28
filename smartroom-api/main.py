@@ -10,8 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from session import db_Session, conn
 from databases import Database
-from schema import Room, Light, Light_Operation
-from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object, Light_Operation_Return_Object, Update_LightObject, Light_Operation_Query_Object, Light_Operation_Storing_Object
+from schema import Room, Light, Light_Operation, Motion_Sensor, Motion_Sensor_Operation
+from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object, Light_Operation_Return_Object, Update_LightObject, Time_Query_Object, Light_Operation_Storing_Object, Motion_Sensor_Object, Motion_Sensor_Update_Object, Motion_Sensor_Operation_Object, Motion_Sensor_Storing_Object
 from typing import List
 from sqlalchemy import and_, text
 from publisher import publish_message
@@ -182,7 +182,7 @@ async def complex_setting_light(room_id: str, light_id: str, operation: Light_Op
 
 
 @app.post("/Rooms/{room_id}/Lights/{light_id}/GetOperations", response_model=List[Light_Operation_Return_Object], status_code=status.HTTP_200_OK)
-async def get_light_data(room_id: str, light_id: str, request: Light_Operation_Query_Object):
+async def get_light_data(room_id: str, light_id: str, request: Time_Query_Object):
 
     if request.timespan_from != 0 and request.timespan_to != 0 and request.interval == 0:
 
@@ -223,6 +223,8 @@ async def get_status_of_light(room_id: str, light_id: str):
 
     publish_message(topic, data)
 
+    return {"code": "success", "message": "Manual save triggered"}
+
 
 @app.post("/Rooms/{room_id}/Lights/{light_id}/Operations", status_code = status.HTTP_200_OK)
 async def post_operation_data_lights(room_id: str, light_id: str, body: Light_Operation_Storing_Object):
@@ -239,152 +241,122 @@ async def post_operation_data_lights(room_id: str, light_id: str, body: Light_Op
     return new_operation
 
 
-# # windows
-# @app.post("/Room/Windows/", response_model=Windows_Object, status_code=status.HTTP_201_CREATED)
-# async def create_Windows(addWindows: Windows_Object):
-#     db_window=Window(room_id=addWindows.room_id,window_id=addWindows.window_id,isopen=addWindows.isopen,time=addWindows.time)
-#     try:
-#         db_Session.add(db_window)
-#         db_Session.flush()
-#         db_Session.commit()
-#     except Exception as ex:
-#         logger.error(f"{ex.__class__.__name__}: {ex}")
-#         db_Session.rollback()
+#motion sensors
 
-#     return addWindows
+@app.post("/Rooms/{room_id}/Motion_Sensors", response_model=Motion_Sensor_Object, status_code=status.HTTP_201_CREATED)
+async def add_Motion_Sensor(room_id: str, addMotionSensor: Motion_Sensor_Object):
+    addMotionSensor = Motion_Sensor(
+        room_id=room_id, sensor_id=addMotionSensor.sensor_id, name=addMotionSensor.name)
+    try:
+        db_Session.add(addMotionSensor)
+        db_Session.flush()
+        db_Session.commit()
+    except Exception as ex:
+        logger.error(f"{ex.__class__.__name__}: {ex}")
+        db_Session.rollback()
 
-# @app.get("/Room/{room_id}/Windows/", response_model=List[Windows_Object], status_code=status.HTTP_200_OK)
-# async def get_All_Windows(room_id: str):
-#     get_AllWindow=db_Session.query(Window).filter(Window.room_id==room_id).all()
-#     return get_AllWindow
+    return addMotionSensor
 
-# @app.get("/Room/{room_id}/Windows/{window_id}/", response_model=List[Windows_Object], status_code=status.HTTP_200_OK)
-# async def get_Specific_Window(room_id: str,window_id:str):
-#     get_SpecificWindow=db_Session.query(Window).filter(Window.room_id==room_id,Window.window_id==window_id).all()
-#     return get_SpecificWindow
+@app.get("/Rooms/{room_id}/Motion_Sensors", response_model=List[Motion_Sensor_Object], status_code=status.HTTP_200_OK)
+async def get_All_Motion_Sensors(room_id: str):
+    allMotionSensors = db_Session.query(Motion_Sensor).filter(
+        Motion_Sensor.room_id == room_id).all()
+    return allMotionSensors
 
-# @app.put("/Room/{room_id}/Windows/{window_id}", status_code=status.HTTP_200_OK)
-# async def update_window(room_id: str,window_id:str,request: Window_Operation_Object):
-#     updateWindow=db_Session.query(Window).filter(Window.room_id==room_id,Window.window_id==window_id)
-#     if not updateWindow.first():
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Window with the id {window_id} is not available in room {room_id}')
-#     updateWindow.update({'isopen':request.isopen,'time':request.time})
-#     db_Session.commit()
-#     return {"code":"success","message":"updated window settings"}
 
-# @app.delete("/Room/{room_id}/Windows/{window_id}", status_code=status.HTTP_200_OK)
-# async def delete_window(room_id: str,window_id: str):
-#     deleteWindow=db_Session.query(Window).filter(Window.room_id==room_id,Window.window_id==window_id).one()
-#     if not deleteWindow:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Window with the id {window_id} is not available in room {room_id}')
-#     db_Session.delete(deleteWindow)
-#     db_Session.commit()
-#     return {"code":"success","message":f"deleted window with id {window_id} from room {room_id}"}
+@app.get("/Rooms/{room_id}/Motion_Sensors/{sensor_id}", response_model=Motion_Sensor_Object, status_code=status.HTTP_200_OK)
+async def get_Specific_Light(room_id: str, sensor_id: str):
+    getSpecificMotionSensor = db_Session.query(Motion_Sensor).filter(
+        Motion_Sensor.room_id == room_id, Motion_Sensor.sensor_id == sensor_id)
+    if not getSpecificMotionSensor.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Motion Sensor with the id {sensor_id} is not available in room {room_id}')
+    return getSpecificMotionSensor
 
-# #ventilators
-# @app.post("/Room/Ventilators/", response_model=Ventilators_Object, status_code=status.HTTP_201_CREATED)
-# async def create_Ventilators(addVentilators: Ventilators_Object):
-#     db_ventilator = Ventilator(room_id=addVentilators.room_id,ventilator_id=addVentilators.ventilator_id,turnon=addVentilators.turnon,time=addVentilators.time)
-#     try:
-#         db_Session.add(db_ventilator)
-#         db_Session.flush()
-#         db_Session.commit()
-#     except Exception as ex:
-#         logger.error(f"{ex.__class__.__name__}: {ex}")
-#         db_Session.rollback()
-#     return addVentilators
 
-# @app.get("/Room/{room_id}/Ventilators/", response_model=List[Ventilators_Object], status_code=status.HTTP_200_OK)
-# async def get_All_Ventilators(room_id:str):
-#     getVentilators=db_Session.query(Ventilator).filter(Ventilator.room_id==room_id).all()
-#     return getVentilators
+@app.put("/Rooms/{room_id}/Motion_Sensors/{sensor_id}", response_model=Motion_Sensor_Object, status_code=status.HTTP_200_OK)
+async def update_motion_sensor(room_id: str, sensor_id: str, request: Motion_Sensor_Update_Object):
+    updateMotionSensor = db_Session.query(Motion_Sensor).filter(
+        Motion_Sensor.room_id == room_id, Motion_Sensor.sensor_id == sensor_id)
+    if not updateMotionSensor.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Motion Sensor with the id {sensor_id} is not available in room {room_id}')
+    updateMotionSensor.update({'name': request.name})
+    db_Session.commit()
+    return updateMotionSensor
 
-# @app.get("/Room/{room_id}/Ventilators/{ventilator_id}/", response_model=List[Ventilators_Object], status_code=status.HTTP_200_OK)
-# async def get_Specific_Ventilator(room_id:str,ventilator_id:str):
-#     getSpecificVentilators=db_Session.query(Ventilator).filter(Ventilator.room_id==room_id,Ventilator.ventilator_id==ventilator_id).all()
-#     return getSpecificVentilators
 
-# @app.put("/Room/{room_id}/Ventilators/{ventilator_id}", status_code=status.HTTP_200_OK)
-# async def update_ventilators(room_id:str,ventilator_id:str,request: Ventilator_Operation_Object):
-#     updateVentilator=db_Session.query(Ventilator).filter(Ventilator.room_id==room_id,Ventilator.ventilator_id==ventilator_id)
-#     if not updateVentilator.first():
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Ventilator with the id {ventilator_id} is not available in room {room_id}')
-#     updateVentilator.update({'turnon':request.turnon,'time':request.time})
-#     db_Session.commit()
-#     return {"code":"success","message":"updated ventilator settings"}
+@app.delete("/Rooms/{room_id}/Motion_Sensors/{sensor_id}", status_code=status.HTTP_200_OK)
+async def delete_motion_sensor(room_id: str, sensor_id: str):
+    deleteMotionSensor = db_Session.query(Motion_Sensor).filter(
+        Motion_Sensor.room_id == room_id, Motion_Sensor.sensor_id == sensor_id).one()
+    if not deleteMotionSensor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Light with the id {sensor_id} is not available in room {room_id}')
+    db_Session.delete(deleteMotionSensor)
+    db_Session.commit()
+    return {"code": "success", "message": f"deleted light with id {sensor_id} from room {room_id}"}
 
-# @app.delete("/Room/{room_id}/Ventilators/{ventilator_id}", status_code=status.HTTP_200_OK)
-# async def delete_ventilator(room_id: str,ventilator_id:str):
-#     deleteVentilator=db_Session.query(Ventilator).filter(Ventilator.room_id==room_id,Ventilator.ventilator_id==ventilator_id).one()
-#     if not deleteVentilator:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Ventilator with the id {ventilator_id} is not available in room {room_id}')
-#     db_Session.delete(deleteVentilator)
-#     db_Session.commit()
-#     return {"code":"success","message":f"deleted ventilator with id {ventilator_id} from room {room_id}"}
 
-# # doors
-# @app.post("/Room/Doors/", response_model=Doors_Object, status_code=status.HTTP_201_CREATED)
-# async def add_Doors(addDoors: Doors_Object):
-#     db_doors = Door(room_id=addDoors.room_id,door_id=addDoors.door_id,door_lock=addDoors.door_lock,connectsdoor=addDoors.connectsdoor,time=addDoors.time)
-#     try:
-#         db_Session.add(db_doors)
-#         db_Session.flush()
-#         db_Session.commit()
-#     except Exception as ex:
-#         logger.error(f"{ex.__class__.__name__}: {ex}")
-#         db_Session.rollback()
-#     return addDoors
+#Motion Sensors Operations
+@app.post("/Rooms/{room_id}/Motion_Sensors/{sensor_id}/GetOperations", response_model=List[Motion_Sensor_Operation_Object], status_code=status.HTTP_200_OK)
+async def get_motion_sensor_data(room_id: str, sensor_id: str, request: Time_Query_Object):
 
-# @app.get("/Room/{room_id}/Doors/", response_model=List[Doors_Object], status_code=status.HTTP_200_OK)
-# async def get_AllDoors(room_id:str):
-#     getDoors=db_Session.query(Door).filter(Door.room_id==room_id).all()
-#     return getDoors
-# @app.get("/Room/{room_id}/Doors/{door_id}", response_model=List[Doors_Object], status_code=status.HTTP_200_OK)
-# async def get_SpecificDoor(room_id:str,door_id:str):
-#     getDoors=db_Session.query(Door).filter(Door.room_id==room_id,Door.door_id==door_id).all()
-#     return getDoors
+    if request.timespan_from != 0 and request.timespan_to != 0 and request.interval == 0:
 
-# @app.put("/Room/{room_id}/Doors/{door_id}", status_code=status.HTTP_200_OK)
-# async def update_door(room_id:str,door_id:str,request: Door_Operation_Object):
-#     updateDoor=db_Session.query(Door).filter(Door.room_id==room_id,Door.door_id==door_id)
-#     if not updateDoor.first():
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Door with the id {door_id} is not available in room {room_id}')
-#     updateDoor.update({'door_lock':request.door_lock,'time':request.time})
-#     db_Session.commit()
-#     return {"code":"success","message":"updated door settings"}
+        # conver to timestamp for comparison
+        to = datetime.fromtimestamp(to)
+        from_t = datetime.fromtimestamp(from_t)
 
-# @app.delete("/Room/{room_id}/Doors/{door_id}",status_code=status.HTTP_200_OK)
-# async def delete_door(room_id: str,door_id: str):
-#    deleteDoor=db_Session.query(Door).filter(Door.door_id==door_id,Door.room_id==room_id).one()
-#    if not deleteDoor:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Door with the id {door_id} is not available in room {room_id}')
-#    db_Session.delete(deleteDoor)
-#    db_Session.commit()
-#    return {"code":"success","message":f"deleted door with id {door_id} from room {room_id}"}
+        results = db_Session.query(Motion_Sensor_Operation).from_statement(
+            text("""SELECT * FROM Motion_Sensor_Operation WHERE room_id = :ri and sensor_id = :si and time < :to and time > :ft ORDER BY time desc""")
+        ).params(ri=room_id, si=sensor_id, to=request.timespan_to, ft=request.timespan_from).all()
 
-# # room_to_door_relation
-# @app.post("/Room_to_Door_Relation/", response_model=Room_Door_Relation_Object, status_code=status.HTTP_201_CREATED)
-# async def add_Room_Door_Relation(addRoomDoorRelation: Room_Door_Relation_Object):
-#     db_room_door_relation = RoomToDoorRelations(room_id=addRoomDoorRelation.room_id,door_id=addRoomDoorRelation.door_id)
-#     try:
-#         db_Session.add(db_room_door_relation)
-#         db_Session.flush()
-#         db_Session.commit()
-#     except Exception as ex:
-#         logger.error(f"{ex.__class__.__name__}: {ex}")
-#         db_Session.rollback()
-#     return addRoomDoorRelation
+        return results
 
-# @app.get("/Room_to_Door_Relation/{room_id}/", response_model=List[Room_Door_Relation_Object], status_code=status.HTTP_200_OK)
-# async def get_Room_Door_Relation(room_id:str):
-#     getRoomDoorRelation=db_Session.query(RoomToDoorRelations).filter(RoomToDoorRelations.room_id==room_id).all()
-#     return getRoomDoorRelation
+    elif request.timespan_from == 0 and request.timespan_to == 0 and request.interval > 0:
 
-# @app.delete("/Room_to_Door_Relation/{room_id}/{door_id}",status_code=status.HTTP_200_OK)
-# async def delete_Room_Door_Relation(room_id: str,door_id:str):
-#    deleteRoomDoorRelation=db_Session.query(RoomToDoorRelations).filter(and_(RoomToDoorRelations.room_id==room_id, RoomToDoorRelations.door_id==door_id)).one()
-#    if not deleteRoomDoorRelation:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Room with the id {room_id} is not available')
-#    db_Session.delete(deleteRoomDoorRelation)
-#    db_Session.commit()
-#    return {"code":"success","message":f"deleted room to door relation with room id {room_id} and door id {door_id}"}
+        results = db_Session.query(Motion_Sensor_Operation).from_statement(
+            text("""SELECT * FROM Motion_Sensor_Operation WHERE room_id = :ri and sensor_id = :si and time > now() - INTERVAL ':interval days' ORDER BY time desc""")
+        ).params(interval=request.interval, ri=room_id, si=sensor_id).all()
+
+        return results
+
+    elif request.timespan_from == 0 and request.timespan_to == 0 and request.interval == 0:
+        results = db_Session.query(Motion_Sensor_Operation).filter(Motion_Sensor_Operation.room_id == room_id,
+                                                          Motion_Sensor_Operation.sensor_id == sensor_id).order_by(Motion_Sensor_Operation.time.desc()).all()
+        return results
+
+    else:
+        raise HTTPException(
+            status_code=400, detail=f'Bad arguments. Pass one value for interval, both values for from and to, or none for all data for the device.')
+
+
+@app.post("/Rooms/{room_id}/Motion_Sensors/{sensor_id}/ManualSavestate", status_code = status.HTTP_200_OK)
+async def get_status_of_motion_sensor(room_id: str, sensor_id: str):
+
+    data = {}
+    data["state"] = " "
+    topic = f"zigbee2mqtt/{sensor_id}/get"
+
+    publish_message(topic, data)
+
+    return {"code": "success", "message": "Manual save triggered"}
+
+
+@app.post("/Rooms/{room_id}/Motion_Sensors/{sensor_id}/Operations", status_code = status.HTTP_200_OK)
+async def post_operation_data_lights(room_id: str, sensor_id: str, body: Motion_Sensor_Storing_Object):
+    new_operation = Motion_Sensor_Operation(room_id=room_id, sensor_id=sensor_id, time=datetime.now(), detection = body.detection)
+    try:
+        db_Session.add(new_operation)
+        db_Session.flush()
+        db_Session.commit()
+    except Exception as ex:
+        logger.error(f"{ex.__class__.__name__}: {ex}")
+        db_Session.rollback()
+
+    return new_operation
+
+
+
+

@@ -64,28 +64,40 @@ class Light_Operation_Return_Object(BaseModel):
 
 
 
-class Light_Operation_Query_Object(BaseModel):
+class Time_Query_Object(BaseModel):
     interval: int
     timespan_from: int
     timespan_to: int
     
 
 
-class Motion_Sensors_Object(BaseModel):
-    room_id: str
+class Motion_Sensor_Object(BaseModel):
     sensor_id: str
     name: str
-    is_active: bool
-    time:Timestamp
 
     class Config:
         orm_mode = True        
+
+class Motion_Sensor_Update_Object(BaseModel):
+    name: str
+
+    class Config:
+        orm_mode = True
+
 
 class Motion_Sensor_Operation_Object(BaseModel):
-    is_active: bool
+    detection: bool
+    time: Timestamp
 
     class Config:
-        orm_mode = True        
+        orm_mode = True
+
+class Motion_Sensor_Storing_Object(BaseModel):
+    detection:bool
+
+    class Config:
+        orm_mode = True
+
 
 class Power_Plug_Object(BaseModel):
     room_id: str

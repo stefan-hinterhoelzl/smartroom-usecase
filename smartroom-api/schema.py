@@ -40,16 +40,26 @@ class Light_Operation(Base):
     light = relationship('Light')
     
 
-class Motion_Sensors(Base):
-    __tablename__ = 'motion_sensors'
+class Motion_Sensor(Base):
+    __tablename__ = 'motion_sensor'
 
     room_id = Column(ForeignKey('room.room_id'), primary_key=True)
     sensor_id = Column(String, primary_key=True)
     name = Column(String, nullable = False)
-    is_active = Column(Boolean, nullable=False)
-    time = Column(DateTime, nullable=False)
 
     room = relationship('Room')
+
+class Motion_Sensor_Operation(Base):
+    __tablename__ = "motion_sensor_operation"
+
+    sensor_id = Column(String, primary_key=True)
+    room_id = Column(String, nullable=False)
+    time = Column(DateTime, primary_key=True)
+    detection = Column(Boolean, nullable=False)
+
+    __table_args__ = (ForeignKeyConstraint([sensor_id, room_id], [Motion_Sensor.sensor_id, Motion_Sensor.room_id]), {})
+
+    motion_sensor = relationship('Motion_Sensor')
 
 class Power_Plug(Base):
     __tablename__ = 'power_plug'

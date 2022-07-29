@@ -67,8 +67,19 @@ class Power_Plug(Base):
     room_id = Column(ForeignKey('room.room_id'), primary_key=True)
     plug_id = Column(String, primary_key=True)
     name = Column(String, nullable = False)
-    is_active = Column(Boolean, nullable=False)
-    time = Column(DateTime, nullable=False)
 
     room = relationship('Room')
+
+class Power_Plug_Operation(Base):
+    __tablename__ = "power_plug_operation"
+
+    plug_id = Column(String, primary_key=True)
+    room_id = Column(String, nullable=False)
+    time = Column(DateTime, primary_key=True)
+    turnon = Column(Boolean, nullable=False)
+
+    __table_args__ = (ForeignKeyConstraint([plug_id, room_id], [Power_Plug.plug_id, Power_Plug.room_id]), {})
+
+    power_plug = relationship('Power_Plug')
+
 

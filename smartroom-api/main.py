@@ -10,8 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from session import db_Session, conn
 from databases import Database
-from schema import Room, Light, Light_Operation, Motion_Sensor, Motion_Sensor_Operation
-from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object, Light_Operation_Return_Object, Update_LightObject, Time_Query_Object, Light_Operation_Storing_Object, Motion_Sensor_Object, Motion_Sensor_Update_Object, Motion_Sensor_Operation_Object, Motion_Sensor_Storing_Object
+from schema import Room, Light, Light_Operation, Motion_Sensor, Motion_Sensor_Operation, Power_Plug, Power_Plug_Operation
+from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_Operation_Object, Light_Operation_Return_Object, Update_LightObject, Time_Query_Object, Light_Operation_Storing_Object, Motion_Sensor_Object, Motion_Sensor_Update_Object, Motion_Sensor_Operation_Object, Motion_Sensor_Storing_Object, Power_Plug_Object, Power_Plug_Update_Object, Power_Plug_Operation_Object, Power_Plug_Storing_Object
 from typing import List
 from sqlalchemy import and_, text
 from publisher import publish_message
@@ -359,5 +359,129 @@ async def post_operation_data_lights(room_id: str, sensor_id: str, body: Motion_
     return new_operation
 
 
+#Power Plugs
+@app.post("/Rooms/{room_id}/Power_Plugs", response_model=Power_Plug_Object, status_code=status.HTTP_201_CREATED)
+async def add_Power_Plug(room_id: str, addPowerPlug: Power_Plug_Object):
+    addPowerPlug = Power_Plug(
+        room_id=room_id, plug_id=addPowerPlug.plug_id, name=addPowerPlug.name)
+    try:
+        db_Session.add(addPowerPlug)
+        db_Session.flush()
+        db_Session.commit()
+    except Exception as ex:
+        logger.error(f"{ex.__class__.__name__}: {ex}")
+        db_Session.rollback()
+
+    return addPowerPlug
 
 
+@app.get("/Rooms/{room_id}/Power_Plugs", response_model=List[Power_Plug_Object], status_code=status.HTTP_200_OK)
+async def get_All_Power_Plugs(room_id: str):
+    allPowerPlugs = db_Session.query(Power_Plug).filter(
+        Power_Plug.room_id == room_id).all()
+    return allPowerPlugs
+
+@app.get("/Rooms/{room_id}/Power_Plugs/{plug_id}", response_model=Power_Plug_Object, status_code=status.HTTP_200_OK)
+async def get_Specific_Light(room_id: str, plug_id: str):
+    getSpecificPowerPlug = db_Session.query(Power_Plug).filter(
+        Power_Plug.room_id == room_id, Power_Plug.plug_id == plug_id)
+    if not getSpecificPowerPlug.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Power Plug with the id {plug_id} is not available in room {room_id}')
+    return getSpecificPowerPlug
+
+
+@app.put("/Rooms/{room_id}/Power_Plugs/{plug_id}", response_model=Power_Plug_Object, status_code=status.HTTP_200_OK)
+async def update_power_plug(room_id: str, plug_id: str, request: Power_Plug_Update_Object):
+    updatePowerPlug = db_Session.query(Power_Plug).filter(
+        Power_Plug.room_id == room_id, Power_Plug.plug_id == plug_id)
+    if not updatePowerPlug.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Motion Sensor with the id {plug_id} is not available in room {room_id}')
+    updatePowerPlug.update({'name': request.name})
+    db_Session.commit()
+    return updatePowerPlug
+
+
+@app.delete("/Rooms/{room_id}/Power_Plugs/{plug_id}", status_code=status.HTTP_200_OK)
+async def delete_power_plug(room_id: str, plug_id: str):
+    deletePowerPlug = db_Session.query(Power_Plug).filter(
+        Power_Plug.room_id == room_id, Power_Plug.plug_id == plug_id).one()
+    if not deletePowerPlug:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Light with the id {plug_id} is not available in room {room_id}')
+    db_Session.delete(deletePowerPlug)
+    db_Session.commit()
+    return {"code": "success", "message": f"deleted light with id {plug_id} from room {room_id}"}
+
+
+
+    #Power Plugs Operations
+@app.post("/Rooms/{room_id}/Power_Plugs/{plug_id}/GetOperations", response_model=List[Power_Plug_Operation_Object], status_code=status.HTTP_200_OK)
+async def get_power_plug_data(room_id: str, plug_id: str, request: Time_Query_Object):
+
+    if request.timespan_from != 0 and request.timespan_to != 0 and request.interval == 0:
+
+        # conver to timestamp for comparison
+        to = datetime.fromtimestamp(to)
+        from_t = datetime.fromtimestamp(from_t)
+
+        results = db_Session.query(Power_Plug_Operation).from_statement(
+            text("""SELECT * FROM Power_Plug_Operation WHERE room_id = :ri and plug_id = :pi and time < :to and time > :ft ORDER BY time desc""")
+        ).params(ri=room_id, pi=plug_id, to=request.timespan_to, ft=request.timespan_from).all()
+
+        return results
+
+    elif request.timespan_from == 0 and request.timespan_to == 0 and request.interval > 0:
+
+        results = db_Session.query(Power_Plug_Operation).from_statement(
+            text("""SELECT * FROM Power_Plug_Operation WHERE room_id = :ri and plug_id = :pi and time > now() - INTERVAL ':interval days' ORDER BY time desc""")
+        ).params(interval=request.interval, ri=room_id, pi=plug_id).all()
+
+        return results
+
+    elif request.timespan_from == 0 and request.timespan_to == 0 and request.interval == 0:
+        results = db_Session.query(Power_Plug_Operation).filter(Power_Plug_Operation.room_id == room_id,
+                                                          Power_Plug_Operation.plug_id == plug_id).order_by(Power_Plug_Operation.time.desc()).all()
+        return results
+
+    else:
+        raise HTTPException(
+            status_code=400, detail=f'Bad arguments. Pass one value for interval, both values for from and to, or none for all data for the device.')
+
+
+@app.post("/Rooms/{room_id}/Power_Plugs/{plug_id}/ManualSavestate", status_code = status.HTTP_200_OK)
+async def get_status_of_power_plug(room_id: str, plug_id: str):
+
+    data = {}
+    data["state"] = " "
+    topic = f"zigbee2mqtt/{plug_id}/get"
+
+    publish_message(topic, data)
+
+    return {"code": "success", "message": "Manual save triggered"}
+
+
+@app.post("/Rooms/{room_id}/Power_Plugs/{plug_id}/Operations", status_code = status.HTTP_200_OK)
+async def post_operation_data_power_plugs(room_id: str, plug_id: str, body: Power_Plug_Storing_Object):
+    new_operation = Power_Plug_Operation(room_id=room_id, plug_id=plug_id, time=datetime.now(), turnon = body.turnon)
+    try:
+        db_Session.add(new_operation)
+        db_Session.flush()
+        db_Session.commit()
+    except Exception as ex:
+        logger.error(f"{ex.__class__.__name__}: {ex}")
+        db_Session.rollback()
+
+    return new_operation
+
+@app.post("/Rooms/{room_id}/Power_Plugs/{plug_id}/Activation", status_code=status.HTTP_200_OK)
+async def activate_Power_Plug(room_id: str, plug_id: str):
+
+    data = {}
+    data["state"] = "TOGGLE"
+    topic = f"zigbee2mqtt/{plug_id}/set"
+
+    publish_message(topic, data)
+
+    return {"code": "success", "message": "Device toggled"}

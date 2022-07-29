@@ -100,18 +100,29 @@ class Motion_Sensor_Storing_Object(BaseModel):
 
 
 class Power_Plug_Object(BaseModel):
-    room_id: str
     plug_id: str
     name: str
-    is_active: bool
-    time:Timestamp
 
     class Config:
         orm_mode = True
 
 class Power_Plug_Operation_Object(BaseModel):
-    is_active: bool
+    turnon: bool
+    time: Timestamp
+    class Config:
+        orm_mode = True
+
+class Power_Plug_Update_Object(BaseModel):
+    name: str
 
     class Config:
         orm_mode = True
+
+class Power_Plug_Storing_Object(BaseModel):
+    turnon:bool
+
+    class Config:
+        orm_mode = True
+
+
 

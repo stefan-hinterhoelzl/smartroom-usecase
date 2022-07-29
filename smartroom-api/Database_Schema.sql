@@ -52,8 +52,18 @@ CREATE TABLE Power_Plug(
 	room_Id varchar NOT NULL,
 	plug_Id varchar NOT NULL,
 	name varchar NOT NULL,
-	is_active boolean NOT NULL,
-	time timestamp NOT NULL,
 	PRIMARY KEY (room_Id, plug_Id),
 	FOREIGN KEY (room_Id) REFERENCES Room (room_Id)
 );
+
+CREATE TABLE Power_Plug_Operation(
+	plug_id varchar NOT NULL,
+	room_id varchar NOT NULL,
+	time timestamp NOT NULL,
+	turnon BOOLEAN NOT NULL,
+	PRIMARY KEY (plug_id, time),
+	FOREIGN KEY (room_id, plug_id) REFERENCES Power_Plug (room_id, plug_id)
+);
+
+SELECT create_hypertable('Power_Plug_Operation', 'time');
+CREATE INDEX ix_plug_id_room_id_time ON Power_Plug_Operation (plug_id, room_id, time DESC);

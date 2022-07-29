@@ -31,9 +31,6 @@ app.add_middleware(
 
 cur = conn.cursor()
 
-# Execute the Subscriber
-subprocess.call("/subscriber.py", shell=True)
-
 
 # room
 @app.post("/Rooms", response_model=Room_Object, status_code=status.HTTP_201_CREATED)

@@ -1,0 +1,13 @@
+# pull official base image
+FROM python:3.9.6-alpine
+
+COPY ./requirements_subscriber.txt /app/requirements.txt
+
+# set work directory
+WORKDIR /app
+COPY ./subscriber.py ./app/subscriber.py
+RUN pip install -r requirements.txt
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1

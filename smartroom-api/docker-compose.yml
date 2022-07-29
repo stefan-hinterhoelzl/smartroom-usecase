@@ -17,6 +17,19 @@ services:
     environment:
       - TZ=Europe/Paris
 
+  subscriber:
+    build:
+      context: .
+      dockerfile: Dockerfile_subscriber
+    networks:
+     - db_network
+    command: python subscriber.py
+
+    depends_on:
+      - simplerest
+    volumes:
+      - ./subscriber.py:/app/subscriber.py
+
   grafana:
     container_name: grafana
     image: grafana/grafana:6.5.0

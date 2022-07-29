@@ -15,3 +15,5 @@ zigpy==0.45.1
 zigpy-znp==0.7.0
 paho-mqtt==1.6.1
 pytz==2022.1
+#subscriber
+requests==2.28.1

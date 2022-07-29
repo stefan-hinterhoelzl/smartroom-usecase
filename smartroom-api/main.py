@@ -15,6 +15,7 @@ from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_
 from typing import List
 from sqlalchemy import and_, text
 from publisher import publish_message
+import subprocess
 
 database = Database(settings.DATABASE_URL)
 
@@ -31,7 +32,7 @@ app.add_middleware(
 cur = conn.cursor()
 
 # Execute the Subscriber
-# os.system("./subscriber.py")
+subprocess.call("/subscriber.py", shell=True)
 
 
 # room

@@ -23,5 +23,5 @@ The system is based on three layers. The first layer is the zigbee network creat
 The API includes Grafana and pgadmin to monitor and visualize the data. 
 
 The system is divided into two separate components. Both are deployed via docker compose files. 
-1.	The zigbee2mqtt server and mosquitto broker combined via separate docker images in a docker compose file. 
-2.	The API with the faspAPI, the mosquitto subscriber, Grafana, pgadmin and the timscaledb all running in their own containers combined via a docker-compose file. 
+- The zigbee2mqtt server and mosquitto broker combined via separate docker images in a docker compose file. 
+- The API with the faspAPI, the mosquitto subscriber, Grafana, pgadmin and the timscaledb all running in their own containers combined via a docker-compose file. 

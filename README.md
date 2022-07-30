@@ -14,6 +14,7 @@ When it comes to Hardware several devices are necessary. Following devices are u
 - [Woox Motion Sensor RC7046](https://wooxhome.com/woox-r7046-smart-pir-motion-sensor-p46)
 - [Lupus Power Plug 12133](https://www.reichelt.at/at/de/funksteckdose-zigbee-ls-12133-p282353.html?r=1)
 - [Woox Security Remote RC7054](https://wooxhome.com/products-c10/security-c6/woox-r7054-smart-remote-control-p53)
+- [Müller Licht LED Stripe 44435](https://www.amazon.de/M%C3%BCller-Licht-1800-6500K-Beleuchtung-vorprogrammierte-Lichtszenen/dp/B07ZPDPST1)
 
 It is recommended to run the zigbee2mqtt server on a [Raspberry Pi running Raspberry OS](https://www.raspberrypi.com/documentation/computers/getting-started.html). 
 The smartroom API can be run on any machine (Windows, Linux, Mac) which has docker and docker-compose installed. 

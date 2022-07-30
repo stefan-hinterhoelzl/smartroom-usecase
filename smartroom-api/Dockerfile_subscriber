@@ -5,8 +5,7 @@ COPY ./requirements_subscriber.txt /app/requirements.txt
 
 # set work directory
 WORKDIR /app
-COPY ./subscriber.py ./app/subscriber.py
-COPY ./devices.json ./app/devices.json
+COPY ./subscriber.py /app/subscriber.py
 RUN pip install -r requirements.txt
 
 # set environment variables

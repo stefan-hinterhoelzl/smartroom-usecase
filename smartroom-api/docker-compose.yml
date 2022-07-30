@@ -28,7 +28,6 @@ services:
     depends_on:
       - simplerest
     volumes:
-      - ./subscriber.py:/app/subscriber.py
       - ./devices.json:/app/devices.json
 
   grafana:
@@ -68,6 +67,7 @@ services:
 
 volumes:
   postgres_data:
+  devices.json:
 networks:
   db_network:
     driver: bridge

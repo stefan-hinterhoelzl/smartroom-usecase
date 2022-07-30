@@ -15,7 +15,7 @@ When it comes to Hardware several devices are necessary. Following devices are u
 - [Lupus Power Plug 12133](https://www.reichelt.at/at/de/funksteckdose-zigbee-ls-12133-p282353.html?r=1)
 - [Woox Security Remote RC7054](https://wooxhome.com/products-c10/security-c6/woox-r7054-smart-remote-control-p53)
 
-It is recommended to run the zigbee2mqtt server on a Raspberry Pi running Raspbian OS. 
+It is recommended to run the zigbee2mqtt server on a [Raspberry Pi running Raspberry OS](https://www.raspberrypi.com/documentation/computers/getting-started.html). 
 The smartroom API can be run on any machine (Windows, Linux, Mac) which has docker and docker-compose installed. 
 
 ## Contents of the Repository

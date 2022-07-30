@@ -5,23 +5,26 @@ import json
 import requests
 
 LOGGER = logging.getLogger()
+##CHANGE URL HERE IF NECESSARY##
 BASE_URL = "http://simplerest:8000/Rooms/"
 
 def on_message(client, userdata, message):
-    print("message topic=", message.topic)
-    print("message received ", str(message.payload.decode("utf-8")))
 
+    #Read devices from json on every message - in case a new device was added
     with open("devices.json", "r") as f:
         devices = json.load(f)
     
+    #Topic concering devices are 30 Chars long -- alternatively use regex to determine this
     if len(message.topic) == 30:
         device = message.topic[12:]
+
+        #Get information about the device that sent a message
         try:
             device_group = devices[device]["device_type"]
             device_room = devices[device]["device_room"]
             payload = json.loads(str(message.payload.decode("utf-8")))
 
-            # map to the correct data type
+            # store the event state via the api according to the device type
             if device_group == "Lights":
                 data = {}
                 if payload["state"] == "OFF":
@@ -58,23 +61,25 @@ def on_message(client, userdata, message):
                 res = requests.post(
                     f"{BASE_URL}{device_room}/Power_Plugs/{device}/Operations", json=data)
 
+
+            ##For this project the remote is not maintained on the API level - it is just used here to map actions to the buttons##
             elif device_group == "Remote":
                 
                 command = payload["action"]
                 if command == "emergency":
-                    #**DEFINE HERE WHAT TO DO ON EMERGENCY BUTTON**
+                    ##DEFINE HERE WHAT TO DO ON EMERGENCY BUTTON##
                     requests.post(f"{BASE_URL}1/Lights/0x804b50fffeb72fd9/Activation")
 
                 elif command == "arm_all_zones":
-                    #**DEFINE HERE WHAT TO DO ON ALL ZONES BUTTON**
+                    ##DEFINE HERE WHAT TO DO ON ARM ALL ZONES BUTTON##
                     requests.post(f"{BASE_URL}1/Power_Plugs/0x847127fffe9f37ad/Activation")
 
                 elif command == "arm_day_zones":
-                    #**DEFINE HERE WHAT TO DO ON ALL ZONES BUTTON**
+                    ##DEFINE HERE WHAT TO DO ON ALL ZONES BUTTON##
                     requests.post(f"{BASE_URL}1/Power_Plugs/0x847127fffe9c05c5/Activation")
 
                 elif command == "disarm":
-                    #**DEFINE HERE WHAT TO DO ON DISARM**
+                    ##DEFINE HERE WHAT TO DO ON DISARM##
                     print("No Operation set")
 
         except KeyError:
@@ -89,10 +94,10 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("zigbee2mqtt/#")
 
 
-client = mqtt.Client("subscriber_indocker")
+client = mqtt.Client("subscriber_docker")
 client.on_message = on_message
 client.on_connect = on_connect
 
-# ****CHANGE IP ADDRESS HERE****
+##CHANGE IP ADDRESS HERE##
 client.connect("192.168.1.35", 1883, 60)
 client.loop_forever()

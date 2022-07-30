@@ -1,5 +1,5 @@
 # A Smartroom Digital Twin Application based on Zigbee2Mqtt
-This repository provides source code and documentation for setting up an example smartroom management. Status data of the devices is stored in a database to allow digital twin applications. 
+This repository provides source code and documentation for setting up an example smartroom management with [zigbee2mqtt](https://www.zigbee2mqtt.io/). Status data of the devices is stored in a database to allow digital twin applications. 
 
 ## Use Case Description
 This repository is designed to provide a custom-built exemplar for digital twins. Currently motion sensors (RC7046), Müller LED strips, Lupus 12133 power plugs and the RC7054 remote to control the devices are supported. Other devices from the same category with the same data structure used in zigbee will also work. The data is stored in a timescale database, which provides extra functionality in querying timeseries data. This enables various digital twin applications. 

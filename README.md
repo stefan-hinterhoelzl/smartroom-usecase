@@ -25,4 +25,4 @@ The API includes Grafana and pgadmin to monitor and visualize the data.
 
 The system is divided into two separate components. Both are deployed via docker compose files. 
 - The zigbee2mqtt server and mosquitto broker combined via separate docker images in a docker compose file. 
-- The API with the faspAPI, the mosquitto subscriber, Grafana, pgadmin and the timscaledb all running in their own containers combined via a docker-compose file. 
+- The API with the fastAPI, the mosquitto subscriber, Grafana, pgadmin and the timscaledb all running in their own containers combined via a docker-compose file. 

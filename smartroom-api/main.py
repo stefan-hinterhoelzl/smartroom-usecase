@@ -32,6 +32,13 @@ app.add_middleware(
 
 cur = conn.cursor()
 
+#create devices.json on first startup
+if not os.path.exists('devices.json'):
+    with open("devices.json", "w") as f:
+        devices = {}
+        json.dump(devices, f)
+
+
 
 # Rooms
 

@@ -1,4 +1,5 @@
 from ast import And
+import json
 import os
 from asyncio.log import logger
 from datetime import datetime
@@ -55,6 +56,7 @@ async def get_AllRoom_Details():
     for i in cur:
         print(i) """
     results = db_Session.query(Room).all()
+
     return results
 
 
@@ -97,6 +99,9 @@ async def add_light(room_id: str, addLight: Lights_Object):
         db_Session.add(addLight)
         db_Session.flush()
         db_Session.commit()
+
+        write_to_json("Lights", room_id, addLight.light_id)
+
     except Exception as ex:
         logger.error(f"{ex.__class__.__name__}: {ex}")
         db_Session.rollback()
@@ -249,6 +254,9 @@ async def add_Motion_Sensor(room_id: str, addMotionSensor: Motion_Sensor_Object)
         db_Session.add(addMotionSensor)
         db_Session.flush()
         db_Session.commit()
+
+        write_to_json("Motion_Sensors", room_id, addMotionSensor.sensor_id)
+
     except Exception as ex:
         logger.error(f"{ex.__class__.__name__}: {ex}")
         db_Session.rollback()
@@ -365,6 +373,9 @@ async def add_Power_Plug(room_id: str, addPowerPlug: Power_Plug_Object):
         db_Session.add(addPowerPlug)
         db_Session.flush()
         db_Session.commit()
+
+        write_to_json("Power_Plugs", room_id, addPowerPlug.plug_id)
+
     except Exception as ex:
         logger.error(f"{ex.__class__.__name__}: {ex}")
         db_Session.rollback()
@@ -462,13 +473,17 @@ async def get_status_of_power_plug(room_id: str, plug_id: str):
 @app.post("/Rooms/{room_id}/Power_Plugs/{plug_id}/Operations", status_code = status.HTTP_200_OK)
 async def post_operation_data_power_plugs(room_id: str, plug_id: str, body: Power_Plug_Storing_Object):
     new_operation = Power_Plug_Operation(room_id=room_id, plug_id=plug_id, time=datetime.now(), turnon = body.turnon)
-    try:
-        db_Session.add(new_operation)
-        db_Session.flush()
-        db_Session.commit()
-    except Exception as ex:
-        logger.error(f"{ex.__class__.__name__}: {ex}")
-        db_Session.rollback()
+
+    last_operation = db_Session.query(Power_Plug_Operation).filter(Power_Plug_Operation.room_id == room_id, Power_Plug_Operation.plug_id == plug_id).order_by(Power_Plug_Operation.time.desc()).first()
+
+    if last_operation == None or (last_operation != None and last_operation.turnon != new_operation.turnon):
+        try:
+            db_Session.add(new_operation)
+            db_Session.flush()
+            db_Session.commit()
+        except Exception as ex:
+            logger.error(f"{ex.__class__.__name__}: {ex}")
+            db_Session.rollback()
 
     return new_operation
 
@@ -482,3 +497,20 @@ async def activate_Power_Plug(room_id: str, plug_id: str):
     publish_message(topic, data)
 
     return {"code": "success", "message": "Device toggled"}
+
+
+#**Helper Methods**
+
+def write_to_json(device_type, device_room, device_key):
+     with open("devices.json", 'r+') as f:
+        devices = json.load(f)
+    
+        information = {}
+        information["device_type"] = device_type
+        information["device_room"] = device_room
+
+        devices[device_key] = information
+
+        f.seek(0)
+        
+        json.dump(devices, f, indent = 4)

@@ -29,6 +29,7 @@ services:
       - simplerest
     volumes:
       - ./subscriber.py:/app/subscriber.py
+      - ./devices.json:/app/devices.json
 
   grafana:
     container_name: grafana
@@ -41,7 +42,6 @@ services:
   timeScaledb:
     container_name: timeScaledb
     image: timescale/timescaledb-ha:pg14-latest
-    restart: always
     networks:
       - db_network
     volumes: 

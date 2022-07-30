@@ -3,7 +3,6 @@ import json
 import os
 from asyncio.log import logger
 from datetime import datetime
-import pytz
 import uvicorn
 import asyncio
 from fastapi import FastAPI, HTTPException, status
@@ -16,7 +15,6 @@ from fastAPI_models import Room_Object, Update_RoomObject, Lights_Object, Light_
 from typing import List
 from sqlalchemy import and_, text
 from publisher import publish_message
-import subprocess
 
 database = Database(settings.DATABASE_URL)
 

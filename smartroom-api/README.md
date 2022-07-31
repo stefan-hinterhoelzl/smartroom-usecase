@@ -26,7 +26,6 @@ To add a device use the respective endpoint based on the device type (plug, sens
 The ID used is the friendly name in zigbee. Per default this is the same as the unique ID. The frindly name can be changed, however be mindful about having unique names in one room! General recommendation - stick to the unique ID given by zigbee. 
 
 
-## Troubleshooting
 
 
 

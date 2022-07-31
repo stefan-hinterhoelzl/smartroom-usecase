@@ -1,5 +1,5 @@
 # Zigbee2Mqtt Server deployment with Docker
-## Important Notes:
+## Important Notes
 The zigbee2mqtt server is based on docker images and needs to be run on a host machine with Linux installed. In order to operate as intended the Sonoff dongle needs to be mapped to the docker container, this is not possible on Windows. It is recommended to run this server on a Raspberry Pi 3 or 4 with Raspberry OS.
 
 It is highly recommended to set the ```permit_join``` option to false once all devices are joined to the network. This prevents other unwanted devices from joining the network.

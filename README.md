@@ -6,7 +6,7 @@ This repository is designed to provide a custom-built exemplar for digital twins
 
 ## Requirements
 ###### 1.	Software
-To run this smartroom application you will need to install [docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/) on at least one machine. The two separate software system can and should preferably be run on two different host machines. The host running the zigbee2mqtt server needs to run Linux. Currently only Linux allows to map a USB port into a docker container. This is required for the Sonoff Dongle. 
+To run this smartroom application you will need to install [docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/) on at least one machine. The two separate software packages can and should preferably be run on two different host machines. The host running the zigbee2mqtt server needs to run Linux. Currently only Linux allows to map a USB port into a docker container. This is required for the Sonoff Dongle. 
 
 ###### 2.	Hardware
 When it comes to Hardware several devices are necessary. Following devices are used for the zigbee network:

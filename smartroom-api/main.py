@@ -230,13 +230,13 @@ async def get_light_data(room_id: str, light_id: str, request: Time_Query_Object
 
     if request.timespan_from != 0 and request.timespan_to != 0 and request.interval == 0:
 
-        # conver to timestamp for comparison
-        to = datetime.fromtimestamp(to)
-        from_t = datetime.fromtimestamp(from_t)
+         # conver to timestamp for comparison
+        to = datetime.fromtimestamp(request.timespan_to)
+        from_t = datetime.fromtimestamp(request.timespan_from)
 
         results = db_Session.query(Light_Operation).from_statement(
             text("""SELECT * FROM Light_Operation WHERE room_id = :ri and light_id = :li and time < :to and time > :ft ORDER BY time desc""")
-        ).params(ri=room_id, li=light_id, to=request.timespan_to, ft=request.timespan_from).all()
+        ).params(ri=room_id, li=light_id, to=to, ft=from_t).all()
 
         return results
 
@@ -377,13 +377,13 @@ async def get_motion_sensor_data(room_id: str, sensor_id: str, request: Time_Que
 
     if request.timespan_from != 0 and request.timespan_to != 0 and request.interval == 0:
 
-        # conver to timestamp for comparison
-        to = datetime.fromtimestamp(to)
-        from_t = datetime.fromtimestamp(from_t)
+         # conver to timestamp for comparison
+        to = datetime.fromtimestamp(request.timespan_to)
+        from_t = datetime.fromtimestamp(request.timespan_from)
 
         results = db_Session.query(Motion_Sensor_Operation).from_statement(
             text("""SELECT * FROM Motion_Sensor_Operation WHERE room_id = :ri and sensor_id = :si and time < :to and time > :ft ORDER BY time desc""")
-        ).params(ri=room_id, si=sensor_id, to=request.timespan_to, ft=request.timespan_from).all()
+        ).params(ri=room_id, si=sensor_id, to=to, ft=from_t).all()
 
         return results
 
@@ -521,12 +521,12 @@ async def get_power_plug_data(room_id: str, plug_id: str, request: Time_Query_Ob
     if request.timespan_from != 0 and request.timespan_to != 0 and request.interval == 0:
 
         # conver to timestamp for comparison
-        to = datetime.fromtimestamp(to)
-        from_t = datetime.fromtimestamp(from_t)
+        to = datetime.fromtimestamp(request.timespan_to)
+        from_t = datetime.fromtimestamp(request.timespan_from)
 
         results = db_Session.query(Power_Plug_Operation).from_statement(
             text("""SELECT * FROM Power_Plug_Operation WHERE room_id = :ri and plug_id = :pi and time < :to and time > :ft ORDER BY time desc""")
-        ).params(ri=room_id, pi=plug_id, to=request.timespan_to, ft=request.timespan_from).all()
+        ).params(ri=room_id, pi=plug_id, to=to, ft=from_t).all()
 
         return results
 

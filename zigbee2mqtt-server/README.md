@@ -1,11 +1,11 @@
 # Zigbee2Mqtt Server deployment with Docker
 ## Important Notes:
-The zigbee2mqtt server is based on docker images and needs to be run on a host machine with Linux installed. In order to operate as intended the Sonoff dongle needs to be mapped to the docker container, this is not possible on Windows. 
+The zigbee2mqtt server is based on docker images and needs to be run on a host machine with Linux installed. In order to operate as intended the Sonoff dongle needs to be mapped to the docker container, this is not possible on Windows. It is recommended to run this server on a Raspberry Pi 3 or 4 with Raspberry OS.
 
 It is highly recommended to set the ```permit_join``` option to false once all devices are joined to the network. This prevents other unwanted devices from joining the network.
 
 ## Installation and Deployment
-1. Open the locally cloned project and open the ```zigbee2mqtt-server``` folder. Open the ```docker-compose.yaml``` and change the device mount point if necessary. In Linux use the ```lsblk``` command to list all the mounted USB devices and figure out which one the Sonoff dongle is mounted to. The USB mount point is specified in the ```devices``` section of the zigbee2mqtt image in the file.
+1. Open the locally cloned project and open the ```zigbee2mqtt-server``` folder. Open the ```docker-compose.yaml``` and change the device mount point if necessary. In Linux use the ```lsblk``` command to list all the mounted USB devices and figure out which one the Sonoff dongle is mounted to. The USB mount point is specified in the ```devices``` section of the zigbee2mqtt container in the file.
 
 ```
 version: '3.8'
@@ -118,4 +118,4 @@ const definition = {
 1. Error related to duplicate network keys:
    This can happen if there are already zigbee networks nearby. The error can be avoided by marginally changing the ```pan_id```, ```ext_pan_id:``` and ```network_key```. 
    
-2. For Raspberry Pis running Raspberry OS Buster it can be necessary to install ```libseccomp2```.
+2. For Raspberry Pis running Raspbian OS Buster it can be necessary to install ```libseccomp2```.

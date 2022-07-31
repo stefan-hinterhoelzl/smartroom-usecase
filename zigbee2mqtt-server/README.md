@@ -113,6 +113,8 @@ const definition = {
 
 4. Start the docker containers with ```docker-compose up``` (```-d``` can be used to start the containers in detached mode). 
 
+## Pair new devices
+
 
 ## Troubleshooting
 1. Error related to duplicate network keys:

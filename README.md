@@ -21,8 +21,8 @@ It is recommended to run the zigbee2mqtt server on a [Raspberry Pi running Raspb
 The smartroom API can be run on any machine (Windows, Linux, Mac) which has docker and docker-compose installed. 
 
 ## Contents of the Repository
-The system is based on three layers. The first layer is the zigbee network created by the Sonoff dongle. This network is not visible through the repository and is started as a component of the zigbee2mqtt service. The devices are connected via the Sonoff dongle. The second layer is the zigbee2mqtt server. This server uses mosquito to relay messages going to and coming from the end devices. The third and top layer is a Python API combined with a timescale database and mqtt publisher/subscriber to control and monitor the devices. 
-The API includes Grafana and pgadmin to monitor and visualize the data. 
+The system is based on three layers. The first layer is the zigbee network created by the Sonoff dongle. This network is not visible through the repository and is started as a component of the zigbee2mqtt service. The devices are connected via the Sonoff dongle. The second layer is the zigbee2mqtt server. This server uses [mosquitto](https://mosquitto.org/) to relay messages going to and coming from the end devices. The third and top layer is a [Python API](https://fastapi.tiangolo.com/) combined with a [timescale database](https://www.timescale.com/) and mqtt publisher/subscriber to control and monitor the devices. 
+The API includes [Grafana](https://grafana.com/) and [pgadmin](https://www.pgadmin.org/) to monitor and visualize the data. 
 
 The system is divided into two separate components. Both are deployed via docker compose files. 
 - The [zigbee2mqtt server](https://github.com/stefan-hinterhoelzl/smartroom-usecase/tree/master/zigbee2mqtt-server) and mosquitto broker combined via separate docker images in a docker compose file. 

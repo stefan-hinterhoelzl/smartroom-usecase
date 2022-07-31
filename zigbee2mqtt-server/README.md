@@ -116,6 +116,6 @@ const definition = {
 
 ## Troubleshooting
 1. Error related to duplicate network keys:
-   This can happen if there are already zigbee networks nearby. The error can be avoided by marginally changing the ```pan_id```, ```ext_pan_id:``` and ```network_key```. 
+   This can happen if there are already zigbee networks nearby. The error can be avoided by marginally changing the ```pan_id```, ```ext_pan_id``` and ```network_key```. 
    
 2. For Raspberry Pis running Raspbian OS Buster it can be necessary to install ```libseccomp2```.

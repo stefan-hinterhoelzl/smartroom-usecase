@@ -13,7 +13,7 @@ The database and mqtt subscriber are connected to the fastAPI via a bridge netwo
 
 ## Installation and Deployment
 1. Open the locally cloned project and open the ```smartroom-api``` folder. Create a ```devices.json``` with an empty JSON object inside ```({})```. This file is mapped into two containers and used to maintain a list of all devices currently joined to the network.
-2.  Use ```docker-compose up``` (```-d``` can be used to start in detached mode) to start the API. On the first start the database is initialized. For this reason on the first start the API itself will exit with an error code. Once the database is initialized, stop the containers again ```(Ctrl + C)``` and start again. 
+2.  Use ```docker-compose up``` (```-d``` can be used to start in detached mode) to start the API. During the first start the database is initialized. For this reason, on the first startup the API container itself will exit with an error code. Although, the ```docker-compose.yaml``` specifies that the API is depending on the database, the system does not recognize the database initialization and will start the API once the database container has started. Once the database is initialized, stop the containers again ```(Ctrl + C)``` and start again. Then everything should start in the right order and run without problems.
 
 ## Endpoint Documentation
 FastAPI provides an automatic documentation of the endpoints in the API. To view it, perform a get request on the ```/docs``` ressource. [Click here](http://localhost:8000/docs) if you are currently using the machine hosting the API to go to the documentation.

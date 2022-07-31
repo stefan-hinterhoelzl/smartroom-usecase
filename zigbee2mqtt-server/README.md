@@ -122,4 +122,4 @@ To add a device to the zigbee network first make sure the ```permit_join``` opti
 1. Error related to duplicate network keys:
    This can happen if there are already zigbee networks nearby. The error can be avoided by marginally changing the ```pan_id```, ```ext_pan_id``` and ```network_key```. 
    
-2. For Raspberry Pis running Raspbian OS Buster it can be necessary to install ```libseccomp2```. Raspbian Buster is deprecated, so the recommended solution is to update to the new Raspberry OS Bullseye.
+2. For Raspberry Pis running Raspberry OS 10 (Buster) it can be necessary to install ```libseccomp2```. Raspbian Buster is the oldstable version since August 14, 2021, so the recommended solution is to update to the new stable Raspberry OS version 11 (Bullseye).

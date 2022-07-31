@@ -116,7 +116,7 @@ const definition = {
 ## Pair new devices
 Pairing devices to the zigbee network and adding them to the API are NOT connected. Meaning, you have to manually add the device to zigbee and then add the device to the API with the id used in the zigbee network. 
 
-To add a device to the zigbee network first make sure the ```permit_join``` option is set to true in the ```configuration.yaml``` file. Otherwise the network will not allow devices to join. To perform the join, put the device into pairing mode (this highly depends on the device). The pairing mode will reset the device, delete the current connection and connect to a new available network. 
+To add a device to the zigbee network first make sure the ```permit_join``` option is set to true in the ```configuration.yaml``` file; Otherwise the network will not allow devices to join. To perform the join, put the device into pairing mode (this highly depends on the device). The pairing mode will reset the device, delete the current connection and connect to a new available network. 
 
 ## Troubleshooting
 1. Error related to duplicate network keys:

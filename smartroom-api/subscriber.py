@@ -14,10 +14,14 @@ def on_message(client, userdata, message):
     with open("devices.json", "r") as f:
         devices = json.load(f)
     
-    #Topic concering devices are 30 Chars long -- alternatively use regex to determine this
-    if len(message.topic) == 30:
-        device = message.topic[12:]
-
+    key_list = list(devices.keys())
+    
+    device = message.topic[12:]
+    
+    
+    #Is the current message in a topic the subscriber is listening to?
+    if device in key_list:
+        
         #Get information about the device that sent a message
         try:
             device_group = devices[device]["device_type"]

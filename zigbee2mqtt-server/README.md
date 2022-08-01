@@ -5,7 +5,7 @@ The zigbee2mqtt server is based on docker images and needs to be run on a host m
 It is highly recommended to set the ```permit_join``` option to false once all devices are joined to the network. This prevents other unwanted devices from joining the network.
 
 ## Installation and Deployment
-1. Open the locally cloned project and open the ```zigbee2mqtt-server``` folder. Open the ```docker-compose.yaml``` and change the device mount point if necessary. In Linux use the ```lsblk``` command to list all the mounted USB devices and figure out which one the Sonoff dongle is mounted to. The USB mount point is specified in the ```devices``` section of the zigbee2mqtt container in the file.
+1. Open the locally cloned project and open the ```zigbee2mqtt-server``` folder. Open the ```docker-compose.yaml``` and change the device mount point if necessary. In Linux use the ```lsblk``` command to list all the mounted USB devices and figure out which mount point the Sonoff dongle is mounted to. The USB mount point is specified in the ```devices``` section of the zigbee2mqtt container in the file.
 
 ```
 version: '3.8'

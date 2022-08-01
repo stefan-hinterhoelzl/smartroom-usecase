@@ -1,4 +1,4 @@
-# Smartroom-API Deployment with Docker
+# Smartroom-API deployment with Docker
 
 ## Important Notes
 The services included in this docker container system are the following:

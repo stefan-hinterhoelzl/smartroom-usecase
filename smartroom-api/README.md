@@ -23,7 +23,7 @@ Pairing devices to the zigbee network and adding them to the API are NOT connect
 
 To add a device use the respective endpoint based on the device type (plug, sensor, light). By adding the device, the subscriber will start to listen for messages coming from this device, the device can be controlled via the API and the database will be able to store and query timeseries status data about the device. The endpoint for adding a device also takes the name for the device as meta data.
 
-The ID used is the friendly name in zigbee. Per default this is the same as the unique ID. The frindly name can be changed in the ```configuration.yaml``` of the [zigbee server](https://github.com/stefan-hinterhoelzl/smartroom-usecase/tree/master/zigbee2mqtt-server), however be mindful about having unique names! General recommendation - stick to the unique ID given by zigbee. 
+The ID used is the friendly name in zigbee. Per default this is the same as the unique ID. The frindly name can be changed in the ```configuration.yaml``` of the [zigbee server](https://github.com/stefan-hinterhoelzl/smartroom-usecase/tree/master/zigbee2mqtt-server), however be mindful about having unique names! Moreover, as of this time the API does not support changing the ID after initial adding. General recommendation - stick to the unique ID given by zigbee. 
 
 
 

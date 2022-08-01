@@ -102,6 +102,10 @@ async def delete_Room(room_id: str):
     if not deleteRoom:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'Room with the room id {room_id} is not found')
+
+        
+   
+
     db_Session.delete(deleteRoom)
     db_Session.commit()
     return {"code": "success", "message": f"deleted room with id {room_id}"}
@@ -170,12 +174,17 @@ async def update_light(room_id: str, light_id: str, request: Update_LightObject)
 async def delete_light(room_id: str, light_id: str):
     deleteLight = db_Session.query(Light).filter(
         Light.room_id == room_id, Light.light_id == light_id).one()
-    if not delete_light:
+    if not deleteLight:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'Light with the id {light_id} is not available in room {room_id}')
+
+
     db_Session.delete(deleteLight)
     db_Session.commit()
+    delete_from_json(light_id)
     return {"code": "success", "message": f"deleted light with id {light_id} from room {room_id}"}
+
+
 
 
 #  Lights Operation
@@ -359,8 +368,10 @@ async def delete_motion_sensor(room_id: str, sensor_id: str):
     if not deleteMotionSensor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'Light with the id {sensor_id} is not available in room {room_id}')
+    
     db_Session.delete(deleteMotionSensor)
     db_Session.commit()
+    delete_from_json(sensor_id)
     return {"code": "success", "message": f"deleted light with id {sensor_id} from room {room_id}"}
 
 
@@ -501,8 +512,10 @@ async def delete_power_plug(room_id: str, plug_id: str):
     if not deletePowerPlug:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'Light with the id {plug_id} is not available in room {room_id}')
+
     db_Session.delete(deletePowerPlug)
     db_Session.commit()
+    delete_from_json(plug_id)
     return {"code": "success", "message": f"deleted light with id {plug_id} from room {room_id}"}
 
 
@@ -609,6 +622,19 @@ def write_to_json(device_type, device_room, device_key):
         information["device_room"] = device_room
 
         devices[device_key] = information
+
+        f.seek(0)
+        
+        json.dump(devices, f, indent = 4)
+
+"""Deletes a device from the device.json file once a device is deleted from the database"""
+def delete_from_json(device_key):
+    with open("devices.json", 'r+') as f:
+        devices = json.load(f)
+        
+        f.truncate(0)
+
+        del devices[device_key]
 
         f.seek(0)
         

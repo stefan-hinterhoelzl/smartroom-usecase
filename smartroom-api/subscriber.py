@@ -17,8 +17,7 @@ def on_message(client, userdata, message):
     key_list = list(devices.keys())
     
     device = message.topic[12:]
-    
-    
+      
     #Is the current message in a topic the subscriber is listening to?
     if device in key_list:
         
@@ -39,7 +38,6 @@ def on_message(client, userdata, message):
                 data["color_x"] = float(payload["color"]["x"])
                 data["color_y"] = float(payload["color"]["y"])
 
-                print(data)
                 
                 res = requests.post(
                     f"{BASE_URL}{device_room}/Lights/{device}/Operations", json=data)
@@ -48,7 +46,6 @@ def on_message(client, userdata, message):
                 data = {}
                 data["detection"] = bool(payload["occupancy"])
                 
-                print(data)
 
                 res = requests.post(
                     f"{BASE_URL}{device_room}/Motion_Sensors/{device}/Operations", json=data)
@@ -60,8 +57,6 @@ def on_message(client, userdata, message):
                 else:
                     data["turnon"] = True
                 
-                print(data)
-
                 res = requests.post(
                     f"{BASE_URL}{device_room}/Power_Plugs/{device}/Operations", json=data)
 
@@ -72,15 +67,15 @@ def on_message(client, userdata, message):
                 command = payload["action"]
                 if command == "emergency":
                     ##DEFINE HERE WHAT TO DO ON EMERGENCY BUTTON##
-                    requests.post(f"{BASE_URL}1/Lights/0x804b50fffeb72fd9/Activation")
+                    requests.post(f"{BASE_URL}1/Lights/Licht/Activation")
 
                 elif command == "arm_all_zones":
                     ##DEFINE HERE WHAT TO DO ON ARM ALL ZONES BUTTON##
-                    requests.post(f"{BASE_URL}1/Power_Plugs/0x847127fffe9f37ad/Activation")
+                    requests.post(f"{BASE_URL}1/Power_Plugs/PowerPlug1/Activation")
 
                 elif command == "arm_day_zones":
                     ##DEFINE HERE WHAT TO DO ON ALL ZONES BUTTON##
-                    requests.post(f"{BASE_URL}1/Power_Plugs/0x847127fffe9c05c5/Activation")
+                    requests.post(f"{BASE_URL}1/Power_Plugs/PowerPlug2/Activation")
 
                 elif command == "disarm":
                     ##DEFINE HERE WHAT TO DO ON DISARM##

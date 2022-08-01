@@ -10,6 +10,7 @@ CREATE TABLE Light(
 	name varchar NOT NULL,
 	PRIMARY KEY (room_id, light_id),
 	FOREIGN KEY (room_id) REFERENCES Room (room_id)
+	ON DELETE CASCADE
 );
 
 CREATE TABLE Light_Operation(
@@ -22,6 +23,7 @@ CREATE TABLE Light_Operation(
 	brightness INTEGER NOT NULL,
 	PRIMARY KEY (light_id, time),
 	FOREIGN KEY (room_id, light_id) REFERENCES Light (room_id, light_id)
+	ON DELETE CASCADE
 );
 
 SELECT create_hypertable('Light_Operation', 'time');
@@ -33,6 +35,7 @@ CREATE TABLE Motion_Sensor(
 	name varchar NOT NULL,
 	PRIMARY KEY (room_id, sensor_Id),
 	FOREIGN KEY (room_id) REFERENCES Room (room_id)
+	ON DELETE CASCADE
 );
 
 CREATE TABLE Motion_Sensor_Operation(
@@ -42,6 +45,7 @@ CREATE TABLE Motion_Sensor_Operation(
 	detection BOOLEAN NOT NULL,
 	PRIMARY KEY (sensor_Id, time),
 	FOREIGN KEY(room_id, sensor_id) REFERENCES Motion_Sensor (room_id, sensor_id)
+	ON DELETE CASCADE
 );
 
 SELECT create_hypertable('Motion_Sensor_Operation', 'time');
@@ -54,6 +58,7 @@ CREATE TABLE Power_Plug(
 	name varchar NOT NULL,
 	PRIMARY KEY (room_Id, plug_Id),
 	FOREIGN KEY (room_Id) REFERENCES Room (room_Id)
+	ON DELETE CASCADE
 );
 
 CREATE TABLE Power_Plug_Operation(
@@ -63,6 +68,7 @@ CREATE TABLE Power_Plug_Operation(
 	turnon BOOLEAN NOT NULL,
 	PRIMARY KEY (plug_id, time),
 	FOREIGN KEY (room_id, plug_id) REFERENCES Power_Plug (room_id, plug_id)
+	ON DELETE CASCADE
 );
 
 SELECT create_hypertable('Power_Plug_Operation', 'time');

@@ -98,5 +98,5 @@ client.on_message = on_message
 client.on_connect = on_connect
 
 ##CHANGE IP ADDRESS HERE##
-client.connect("192.168.1.35", 1883, 60)
+client.connect("140.78.42.123", 1883, 60)
 client.loop_forever()

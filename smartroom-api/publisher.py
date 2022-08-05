@@ -7,7 +7,7 @@ import json
 TOPIC = ""
 DATA = {}
 #****Change Host IP if necessary here****
-MOSQUITTO_HOST = "192.168.1.35"
+MOSQUITTO_HOST = "140.78.42.123"
 CLIENT_NAME = "publisher"
 
 def publish_message(topic, data):

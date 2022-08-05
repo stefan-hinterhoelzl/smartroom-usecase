@@ -9,7 +9,7 @@ services:
       - db_network
     command: uvicorn main:app --host 0.0.0.0 --port 8000
     ports:
-      - 8000:8000
+      - 8001:8000
       - 1883:1883
     depends_on:
       - timeScaledb
@@ -32,11 +32,11 @@ services:
     volumes:
       - ./devices.json:/app/devices.json
 
-  grafana:
-    container_name: grafana
+  grafana_smartroom:
+    container_name: grafana_smartroom
     image: grafana/grafana:6.5.0
     ports:
-    - 3000:3000
+    - 3001:3000
     networks:
     - db_network
 
@@ -54,8 +54,8 @@ services:
       - POSTGRES_PASSWORD=cdlmint
       - POSTGRES_DB=cdl-mint
 
-  pgadmin:
-    container_name: pgadmin
+  pgadmin_smartroom:
+    container_name: pgadmin_smartroom
     image: dpage/pgadmin4
     environment:
       - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
@@ -63,7 +63,7 @@ services:
     networks:
       - db_network
     ports:
-      - 5050:80
+      - 5051:80
     depends_on:
       - timeScaledb
 

@@ -143,6 +143,7 @@ const definition = {
 Pairing devices to the zigbee network and adding them to the API are NOT connected. Meaning, you have to manually add the device to zigbee and then add the device to the API with the id used in the zigbee network. Click here for the instructions on how to pair devices to the API.
 
 To add a device to the zigbee network first make sure the ```permit_join``` option is set to ```true``` in the ```configuration.yaml``` file. Otherwise the network will not allow devices to join. To perform the join, put the device into pairing mode (this highly depends on the device). The pairing mode will reset the device, delete the current connection and connect to a new available network. 
+
 For the devices used in this projects pairing mode can be entered through following actions:
 - For the motion sensors and the remote use a needle to press the reset button on the back of the devices for a few seconds. Once the devices start blinking they entered pairing mode. 
 - For the LED strip turn the light on, then off and on again within 2 seconds, afterwards quicky turn it off and on again 4 times.

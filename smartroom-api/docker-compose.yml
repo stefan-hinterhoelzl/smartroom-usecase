@@ -4,7 +4,7 @@ services:
     container_name: smartroom_api
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: api/Dockerfile
     networks:
       - db_network
     command: uvicorn main:app --host 0.0.0.0 --port 8000
@@ -14,7 +14,8 @@ services:
     depends_on:
       - timeScaledb
     volumes:
-      - ./:/app/
+      - ./api/:/app/
+      - ./devices.json:/app/devices.json
     environment:
       - TZ=Europe/Paris
 
@@ -22,7 +23,7 @@ services:
     container_name: smartroom_mqtt_subscriber
     build:
       context: .
-      dockerfile: Dockerfile_subscriber
+      dockerfile: subscriber/Dockerfile_subscriber
     networks:
      - db_network
     command: python subscriber.py
@@ -47,7 +48,7 @@ services:
       - db_network
     volumes: 
       - /data/timescaledb:/var/lib/postgresql/postgres_data
-      - ./Database_Schema.sql:/docker-entrypoint-initdb.d/Database_Schema.sql
+      - ./database/Database_Schema.sql:/docker-entrypoint-initdb.d/Database_Schema.sql
     environment:
       - PGDATA=/var/lib/postgresql/data/timescale/
       - POSTGRES_USER=postgres

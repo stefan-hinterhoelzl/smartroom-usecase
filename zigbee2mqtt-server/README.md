@@ -5,10 +5,10 @@ The zigbee2mqtt server creates a zigbee network and allows to pair devices to th
 It is highly recommended to set the ```permit_join``` option to false once all devices are joined to the network. This prevents other unwanted devices from joining the network.
 
 ## Requirements
-###### Software
+#### Software
 To run the zigbee2mqtt server you will need to install [docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/) on a machine running any GNU/Linux distribution. Currently only Linux allows to map a USB port into a docker container. This is required for the Sonoff Dongle. 
 
-###### Hardware
+#### Hardware
 The centerpiece of the zigbee network is the sonoff dongle. It creates the zigbee network for the smartroom devices. This dongle (or a comparable product) needs to be plugged into the hosting machine of the server all the time. The hosting machine needs to have this zigbee2mqtt server locally cloned and running to work. It is recommended to run the zigbee2mqtt server on a [Raspberry Pi running Raspberry OS](https://www.raspberrypi.com/documentation/computers/getting-started.html). 
 
 When it comes to zigbee hardware, several devices are necessary. Following devices are used for the zigbee network:

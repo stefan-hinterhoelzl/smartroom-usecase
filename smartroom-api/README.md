@@ -7,18 +7,18 @@ This repository needs to be cloned to the desired server host. The host can be o
 The services included in this docker container system are the following. The stated ports are preconfigured and can be changed in the docker configurations. 
 
 #### fastAPI on port 8000
-The fastAPI container starts the core python API in this system. The API communicates with the zigbee network through the ```publisher.py``` file. Files related to the API are stored in the ```api``` subfolder. The API itself is in the ```main.py``` file. Endpoints can directly be added in there. The ```fastAPI_models``` file can be used to define structures for objects to map received JSON structures to python dictionaries. The ```schema.py``` needs to contain the database structure. In case the database is extended with tables for more devices, they need to be added in this file addtionally to the database initialization sql file. The ```session.py``` and ```config.py``` contain configurations and connection strings. It is highly recommended to work with the predefined configuration there, however, in case the container name/port/database user/database name/database password are changed the changes also need to be propagated to the config files here. Devices currently added to the API are stored in the ```devices.json```. This file is in the root folder, since the api as well as the subscriber are accessing it. 
+The fastAPI container starts the core python API in this system. The API communicates with the zigbee network through the [```publisher.py```}(/api/publisher.py) file. Files related to the API are stored in the ```api``` subfolder. The API itself is in the ```main.py``` file. Endpoints can directly be added in there. The ```fastAPI_models``` file can be used to define structures for objects to map received JSON structures to python dictionaries. The ```schema.py``` needs to contain the database structure. In case the database is extended with tables for more devices, they need to be added in this file addtionally to the database initialization sql file. The ```session.py``` and ```config.py``` contain configurations and connection strings. It is highly recommended to work with the predefined configuration there, however, in case the container name/port/database user/database name/database password are changed the changes also need to be propagated to the config files here. Devices currently added to the API are stored in the ```devices.json```. This file is in the root folder, since the api as well as the subscriber are accessing it. 
 
-#### timescaledb on port 5432:
+#### timescaledb on port 5432
 The timescale database is started in its own docker container. In the ```environment``` of the ```docker-compose.yaml```  the userdata can be changed (username, database name, password). However, as stated above. It is recommended to stick to the default configuartion here. In the subfolder ```database``` the ```Database_Schema.sql``` file defines the sql script that is run on the first startup of the container. If the container already contains a database, the initialization is skipped. If the system is extended, this sql script needs to be also extended with the necessary tables. Please note the syntax to create hypertables and indices, which enable time series queries on the data. The database is connected to the other containers via a bridge network. The host of the database therefore is the container name (timeScaledb). Docker maps the container name to the given IP. 
 
-#### grafana on port 3000:
+#### grafana on port 3000
 Grafana can be used to visualize data on the database. Grafana is connected to the timescale database.
 
-#### pgadmin on port 5050:
+#### pgadmin on port 5050
 PGadmin can be used to manually read or write from/to the database without using the API. This is very helpful, especially during developement.
-  
-#### subscriber no exposed port:
+
+#### subscriber no exposed port
 The subscriber is running in a standalone container. The subscriber listens to the mqtt network created by the zigbee2mqtt-server. If a message from a device listed in the ```devices.json``` is received it contains operational data for this device. The subscriber stores this data through an endpoint on the API. For this reason, both the subscriber and the API need to have access to the ```devices.json``` in the ```smartroom-api``` root folder. One exception is the remote, which does not exist on API level. Meaning the remote needs to be added to the ```devices.json``` manually. The ```subscriber.py``` file defines actions for the four buttons on the remote. Respective API calls are triggered. 
 
 

@@ -4,7 +4,7 @@ services:
     container_name: smartroom_api
     build: 
       context: .
-      dockerfile: api/Dockerfile
+      dockerfile: Dockerfile
     networks:
       - db_network
     command: uvicorn main:app --host 0.0.0.0 --port 8000
@@ -23,7 +23,7 @@ services:
     container_name: smartroom_mqtt_subscriber
     build:
       context: .
-      dockerfile: subscriber/Dockerfile_subscriber
+      dockerfile: Dockerfile_subscriber
     networks:
      - db_network
     command: python subscriber.py

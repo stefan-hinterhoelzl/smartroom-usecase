@@ -1,11 +1,11 @@
 # pull official base image
 FROM python:3.9.6-alpine
 
-COPY ./requirements.txt /app/requirements.txt
+COPY ./api/requirements.txt /app/requirements.txt
 
 # set work directory
 WORKDIR /app
-COPY . ./app
+COPY ./api ./app
 RUN apk add --no-cache gcc musl-dev build-base postgresql-dev libffi-dev
 RUN pip install -r requirements.txt
 

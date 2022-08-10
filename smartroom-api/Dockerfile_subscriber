@@ -1,11 +1,11 @@
 # pull official base image
 FROM python:3.9.6-alpine
 
-COPY /subscriber/requirements_subscriber.txt /app/requirements.txt
+COPY ./subscriber/requirements_subscriber.txt /app/requirements.txt
 
 # set work directory
 WORKDIR /app
-COPY /subscriber/subscriber.py /app/subscriber.py
+COPY ./subscriber/subscriber.py /app/subscriber.py
 RUN pip install -r requirements.txt
 
 # set environment variables

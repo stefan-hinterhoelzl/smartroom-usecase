@@ -15,7 +15,7 @@ The timescale database is started in its own docker container. In the ```environ
 #### grafana on port 3001
 Grafana can be used to visualize data on the database. Grafana is connected to the timescale database.
 
-#### pgadmin on port 5051
+#### pgAdmin on port 5051
 PGadmin can be used to manually read or write from/to the database without using the API. This is very helpful, especially during developement. The email and password for pgadmin can be configured in the [```docker-compose.yaml```](./docker-compose.yml).
 
 #### subscriber no exposed port
@@ -41,7 +41,7 @@ This section shows a running example of pairing a device in the API and reading 
 At this point it is assumed that the device has already been paired to the zigbee network as stated in the documentation of the [zigbee2mqtt-server](https://github.com/stefan-hinterhoelzl/smartroom-usecase/tree/master/zigbee2mqtt-server).
 
 
-#### Pairing the device to the API
+#### Pairing the Device to the API
 1. The device needs to be associated to a specific room. The device is addressed via the room. Therefore, before adding a device, we need to create a room on the post endpoint ```/Rooms```. 
 
 ![Post Room](/assets/images/create_room.png)
@@ -49,27 +49,27 @@ At this point it is assumed that the device has already been paired to the zigbe
 2. A device can now be added to an existing room. If the ```room_id``` used is not found the endpoint returns an error. For this running example it is assumed that a light is added to the API. The post endpoint for this operation is ```/Rooms/{room_id}/Lights```. The ```light_id``` provided to this endpoint needs to match the friendly name used in the zigbee network. 
 
 ![Post Light](/assets/images/create_light.png)
-#### Requesting State data
+#### Requesting State Data
 Devices paired to the zigbee network send data about their current state. This happens either on first joining the network, after a change was made to their state or when requested by the zigbee2mqtt server. The light for example transmit an updated state event every time it is toggled or the color/brightness change. An update can be requested by sending a message to the topic ```zigbee2mqtt/{friendly_name_of_the_device}/get```. The post endpoint ```/Rooms/{room_id}/Lights/{light_id}/ManualSavestate``` essentially does exactly that. The API store every state update of any device paired to the API, no matter how the state transmit was triggered. 
 
 ![Manual Savestate](/assets/images/manual_savestate.png)
-#### Reading data through the API (interval and from-to in UNIX timestamps)
+#### Reading Data through the API (interval and from-to in UNIX timestamps)
 Operational data of devices stored in the database can be queried with the post! endpoint ```/Rooms/{room_id}/Lights/{light_id}/GetOperations```. Althoug this is a get request in nature, a body is required for this request, therefore it needs to be done via a post request. The JSON body has three arguments: ```interval```, ```timespan_from```, ```timespan_to```. The interval is represented by days. The integer states how many days back operationl data should be returned. The timespan arguments are connected. They represent UNIX timestamps. Operational Data between those timespans is returned. If all arguments are set to ```0```, all data for the specfic device is returned. If one time constraint is filled, the other one needs to be ```0```. Setting both will result in a error from the API. 
 
 ![Get Operation](/assets/images/get_operations.png)
-#### Reading data in pgadmin
-1. Pgadmin is per default available in the browser on the host's IP on port 5051. When accessing admin for the first time the database connection needs to be configured. This is done by clicking on ```Add New Server``` in the quick links section. 
+#### Reading Data in pgAdmin
+1. pgAdmin is per default available in the browser on the host's IP on port 5051. When accessing admin for the first time the database connection needs to be configured. This is done by clicking on ```Add New Server``` in the quick links section. 
 
 ![PG Admin 1](/assets/images/pgadmin_1.png)
 
-2. The connection uses the configuration from the [```docker-compose.yaml```](./docker-compose.yml) file. As Hostname the container name of the timescale database is entered. 
+2. The connection uses the configuration from the [```docker-compose.yaml```](./docker-compose.yml) file. As hostname the container name of the timescale database is entered. The connection is saved with ```Save``` on the right hand bottom end of the overlay window.
 
 ![PG Admin 1](/assets/images/pgadmin_2.png)
 
 3. On the left hand side in the menu the tables can be found as shown in the figure below. Through this interface data can be added, deleted, modified or simply read. 
 
 ![PG Admin 1](/assets/images/pgadmin_3.png)
-#### Deleting device from the API
+#### Deleting the Device from the API
 Data from the API can be deleted with the respective endpoint. For lights the delete request is ```Rooms/{room_id}/Lights/{light_id```. The API performs a casacding delete, meaning once a light is removed all the operational data for the light is removed. The same is true for rooms. If a room is deleted, all the devices and corresponding operational data is deleted. 
 
 ![PG Admin 1](/assets/images/delete_light.png)

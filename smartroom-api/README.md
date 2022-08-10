@@ -41,9 +41,6 @@ This section shows a running example of pairing a device in the API and reading 
 At this point it is assumed that the device has already been paired to the zigbee network as stated in the documentation of the [zigbee2mqtt-server](https://github.com/stefan-hinterhoelzl/smartroom-usecase/tree/master/zigbee2mqtt-server).
 
 
-![Layer Graphic](/assets/images/Architektur.png)
-
-
 #### Pairing the device to the API
 1. The device needs to be associated to a specific room. The device is addressed via the room. Therefore, before adding a device, we need to create a room on the post endpoint ```/Rooms```. 
 

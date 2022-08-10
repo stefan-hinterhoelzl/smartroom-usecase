@@ -37,9 +37,18 @@ To add a device use the respective endpoint based on the device type (plug, sens
 The ID used is the friendly name in zigbee. Per default this is the same as the unique ID. The frindly name can be changed in the ```configuration.yaml``` of the [zigbee server](https://github.com/stefan-hinterhoelzl/smartroom-usecase/tree/master/zigbee2mqtt-server), however be mindful about having unique names! Moreover, as of this time the API does not support changing the ID after initial adding. General recommendation - stick to the unique ID given by zigbee. 
 
 ## Usecase Running Example
-TBA
+This section shows a running example of pairing a device in the API and reading data through the api and with pgadmin. 
+At this point it is assumed that the device has already been paired to the zigbee network as stated in the documentation of the [zigbee2mqtt-server](https://github.com/stefan-hinterhoelzl/smartroom-usecase/tree/master/zigbee2mqtt-server).
 
+#### Pairing the device to the API
 
+#### Requesting State data
+
+#### Reading data through the API (interval and from-to in UNIX timestamps)
+
+#### Reading data in pgadmin
+
+#### Deleting device from the API
 
 
 

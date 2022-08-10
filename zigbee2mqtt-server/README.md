@@ -2,7 +2,7 @@
 The zigbee2mqtt server creates a zigbee network and allows to pair devices to this network. The server relays messages from and to the zigbee network by converting zigbee event messages in the network into mqtt messages and vice versa. Zigbee2mqtt uses the mosquitto broker to receive and send messages. This allows for more interoperability with zigbee devices since many other software and hardware components provide functionality for dealing with mqtt messages. 
 
 ## Important Note
-It is highly recommended to set the ```permit_join``` option to false once all devices are joined to the network. This prevents other unwanted devices from joining the network.
+It is highly recommended to set the ```permit_join``` option in the configuration to false once all devices are joined to the network. This prevents other unwanted devices from joining the network.
 
 ## Requirements
 #### Software
@@ -21,7 +21,7 @@ When it comes to zigbee hardware, several devices are necessary. Following devic
 The system is designed to support the above listed devices. However, devices using the same data structure in zigbee2mqtt will also work. 
 
 ## Installation and Deployment
-1. Open the  ```zigbee2mqtt-server``` folder locally on your machine.  Open the [```docker-compose.yaml```](./docker-compose.yaml) and change the device mount point if necessary. Use the following command ```ls -l /dev/serial/by-id``` to figure out which mount point the Sonoff dongle is mounted to. The USB mount point is specified in the ```devices``` section of the zigbee2mqtt container in the ```docker-compose.yaml```.
+1. Open the  ```zigbee2mqtt-server``` folder locally on your machine.  Open the [```docker-compose.yaml```](./docker-compose.yaml) and change the device mount point if necessary. Use the following command ```ls -l /dev/serial/by-id``` to figure out which mount point the Sonoff dongle is mounted to. The USB mount point is specified in the ```devices``` section of the zigbee2mqtt container in the [```docker-compose.yaml```](./docker-compose.yaml).
 
 Example output for the above stated command:
 ```

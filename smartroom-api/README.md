@@ -1,7 +1,7 @@
 # Smartroom-API deployment with Docker
 
 ## Requirements
-This repository needs to be cloned to the desired server host. The host can be operated on any operating system. The host needs to have docker and docker-compose installed. 
+This repository needs to be cloned to the desired server host. The host can be operated on any operating system. The host needs to have [docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/) installed. 
 
 ## Important Notes
 The services included in this docker container system are the following. The stated ports are preconfigured and can be changed in the docker configurations. 

@@ -70,7 +70,7 @@ Operational data of devices stored in the database can be queried with the post!
 
 ![PG Admin 1](/assets/images/pgadmin_3.png)
 #### Deleting the Device from the API
-Data from the API can be deleted with the respective endpoint. For lights the delete request is ```Rooms/{room_id}/Lights/{light_id```. The API performs a casacding delete, meaning once a light is removed all the operational data for the light is removed. The same is true for rooms. If a room is deleted, all the devices and corresponding operational data is deleted. 
+Data from the API can be deleted with the respective endpoint. For lights the delete request is ```Rooms/{room_id}/Lights/{light_id}```. The API performs a casacding delete, meaning once a light is removed all the operational data for the light is removed. The same is true for rooms. If a room is deleted, all the devices and corresponding operational data is deleted. 
 
 ![PG Admin 1](/assets/images/delete_light.png)
 

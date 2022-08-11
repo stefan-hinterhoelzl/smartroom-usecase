@@ -16,7 +16,7 @@ The timescale database is started in its own docker container. In the ```environ
 Grafana can be used to visualize data on the database. Grafana is connected to the timescale database.
 
 #### pgAdmin on port 5051
-PGadmin can be used to manually read or write from/to the database without using the API. This is very helpful, especially during developement. The email and password for pgadmin can be configured in the [```docker-compose.yaml```](./docker-compose.yml).
+pgAadmin can be used to manually read or write from/to the database without using the API. This is very helpful, especially during developement. The email and password for pgadmin can be configured in the [```docker-compose.yaml```](./docker-compose.yml).
 
 #### subscriber (no exposed port)
 The mqtt-subscriber is running in it's own container. The subscriber listens to the mqtt network created by the zigbee2mqtt-server. If a message from a device listed in the ```devices.json``` is received it contains operational data for this device. The subscriber stores this data through an endpoint on the API. For this reason, both the subscriber and the API need to have access to the ```devices.json``` in the ```smartroom-api``` root folder. One exception is the remote, which does not exist on API level. Meaning the remote needs to be added to the ```devices.json``` manually. The [```subscriber.py```](./subscriber/subscriber.py) file defines actions for the four buttons on the remote. Respective API calls are triggered. 

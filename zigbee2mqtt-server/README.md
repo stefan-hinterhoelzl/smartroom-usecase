@@ -149,7 +149,7 @@ For the devices used in this projects pairing mode can be entered through follow
 - For the LED strip turn the light on, then off and on again within 2 seconds, afterwards quicky turn it off and on again 4 times.
 - For the power plugs, hold the power button until the LED in the power button starts to blink.
 
-Be aware that in most cases the [zigbee2mqtt "supported devices"] subpage(https://www.zigbee2mqtt.io/supported-devices/) has instructions on how to pair officially supported devices (currently 2371 devices).
+Be aware that in most cases the [zigbee2mqtt "supported devices"](https://www.zigbee2mqtt.io/supported-devices/) subpage has instructions on how to pair officially supported devices (currently 2371 devices).
 
 ## Troubleshooting
 1. Error related to duplicate network keys:

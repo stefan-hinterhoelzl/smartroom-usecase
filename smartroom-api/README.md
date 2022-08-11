@@ -50,7 +50,7 @@ At this point it is assumed that the device has already been paired to the zigbe
 
 ![Post Light](/assets/images/create_light.png)
 #### Requesting State Data
-Devices paired to the zigbee network send data about their current state. This happens either on first joining the network, after a change was made to their state or when requested by the zigbee2mqtt server. The light for example transmits an updated state event every time it is toggled or the color/brightness change. An update can be requested by sending a message to the topic ```zigbee2mqtt/{friendly_name_of_the_device}/get```. The post endpoint ```/Rooms/{room_id}/Lights/{light_id}/ManualSavestate``` essentially does exactly that. The API store every state update of any device paired to the API, no matter how the state transmit was triggered. 
+Devices paired to the zigbee network send data about their current state. This happens either on first joining the network, after a change was made to their state or when requested by the zigbee2mqtt server. The light for example transmits an updated state event every time it is toggled or the color/brightness change. An update can be requested by sending a message to the topic ```zigbee2mqtt/{friendly_name_of_the_device}/get```. The post endpoint ```/Rooms/{room_id}/Lights/{light_id}/ManualSavestate``` essentially does exactly that. The API stores every state update of any device paired to the API, no matter how the state transmit was triggered. 
 
 ![Manual Savestate](/assets/images/manual_savestate.png)
 #### Reading Data through the API (interval and from-to in UNIX timestamps)
